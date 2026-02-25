@@ -1,0 +1,152 @@
+# ============================================================
+# Ingress – Nginx Ingress Controller
+# TLS, rate limiting, CORS konfigürasyonu
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nl2sql-ingress
+  namespace: nl2sql
+  labels:
+    app.kubernetes.io/part-of: nl2sql
+  annotations:
+    # Ingress Controller
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+    # TLS – Let's Encrypt (cert-manager)
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+    # Rate Limiting (Ingress düzeyinde)
+    nginx.ingress.kubernetes.io/limit-rps: "50"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "3"
+    nginx.ingress.kubernetes.io/limit-connections: "20"
+
+    # Proxy settings
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: SAMEORIGIN";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+      more_set_headers "Permissions-Policy: camera=(), microphone=(), geolocation=()";
+
+    # CORS
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://nl2sql.nurolteknoloji.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type, X-Requested-With"
+    nginx.ingress.kubernetes.io/cors-max-age: "3600"
+
+spec:
+  tls:
+    - hosts:
+        - nl2sql.nurolteknoloji.com
+      secretName: nl2sql-tls
+  rules:
+    - host: nl2sql.nurolteknoloji.com
+      http:
+        paths:
+          # Frontend – Ana sayfa ve statik dosyalar
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 3000
+
+          # Core Backend API
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: core-backend-service
+                port:
+                  number: 8001
+
+          # AI Backend (doğrudan erişim gerekirse)
+          - path: /ai
+            pathType: Prefix
+            backend:
+              service:
+                name: ai-backend-service
+                port:
+                  number: 8000
+---
+# ============================================================
+# Network Policy – Pod arası iletişim kuralları
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nl2sql-network-policy
+  namespace: nl2sql
+spec:
+  podSelector: {}   # Tüm pod'lara uygulanır
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Aynı namespace içindeki pod'lar birbirleriyle konuşabilir
+    - from:
+        - podSelector: {}
+    # Ingress controller'dan gelen trafik
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+  egress:
+    # Aynı namespace içi
+    - to:
+        - podSelector: {}
+    # DNS çözümleme
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Dış API'lere erişim (OpenAI vb.)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+---
+# ============================================================
+# Database Network Policy – Sadece backend erişebilir
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-network-policy
+  namespace: nl2sql
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ai-backend
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: core-backend
+      ports:
+        - protocol: TCP
+          port: 5432

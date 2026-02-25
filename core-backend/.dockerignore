@@ -1,0 +1,29 @@
+# Core Backend .dockerignore (.NET)
+.git/
+.gitignore
+.env
+.env.*
+*.md
+docs/
+.vscode/
+.idea/
+Dockerfile
+docker-compose*.yml
+*.tar.gz
+*.log
+
+# .NET
+**/bin/
+**/obj/
+**/out/
+**/.vs/
+**/*.user
+**/*.suo
+**/TestResults/
+**/coverage/
+**/*.DotSettings
+
+# Tests (testleri image'a dahil etme)
+**/tests/
+**/*Tests/
+**/*Test/

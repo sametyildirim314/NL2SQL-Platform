@@ -1,0 +1,180 @@
+# ============================================================
+# Core Backend – Deployment + Service + HPA
+# ============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-backend
+  namespace: nl2sql
+  labels:
+    app.kubernetes.io/name: core-backend
+    app.kubernetes.io/part-of: nl2sql
+    app.kubernetes.io/component: api
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: core-backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: core-backend
+        app.kubernetes.io/part-of: nl2sql
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+        prometheus.io/path: "/metrics"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: core-backend
+                topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: core-backend
+          image: ghcr.io/nurol-teknoloji/nl2sql-core-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+              protocol: TCP
+              name: http
+          envFrom:
+            - configMapRef:
+                name: nl2sql-config
+          env:
+            # ASP.NET Core environment
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ASPNETCORE_URLS
+              value: "http://+:8001"
+            # Connection Strings (.NET format)
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=$(POSTGRES_HOST);Port=$(POSTGRES_PORT);Database=$(POSTGRES_DB);Username=$(POSTGRES_USER);Password=$(POSTGRES_PASSWORD)"
+            - name: ConnectionStrings__Redis
+              value: "$(REDIS_HOST):$(REDIS_PORT),password=$(REDIS_PASSWORD),abortConnect=false"
+            # AI Backend
+            - name: AIBackend__BaseUrl
+              value: "http://ai-backend-service:8000"
+            # JWT
+            - name: Jwt__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: nl2sql-secrets
+                  key: JWT_SECRET_KEY
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nl2sql-secrets
+                  key: POSTGRES_PASSWORD
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nl2sql-secrets
+                  key: REDIS_PASSWORD
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-backend-service
+  namespace: nl2sql
+  labels:
+    app.kubernetes.io/name: core-backend
+    app.kubernetes.io/part-of: nl2sql
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: core-backend
+  ports:
+    - port: 8001
+      targetPort: 8001
+      protocol: TCP
+      name: http
+---
+# ============================================================
+# HPA – Core Backend Auto-Scaling
+# ============================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: core-backend-hpa
+  namespace: nl2sql
+  labels:
+    app.kubernetes.io/name: core-backend
+    app.kubernetes.io/part-of: nl2sql
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: core-backend
+  minReplicas: 3
+  maxReplicas: 12
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 3
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60

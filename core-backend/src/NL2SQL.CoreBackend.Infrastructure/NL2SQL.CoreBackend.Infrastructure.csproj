@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NL2SQL.CoreBackend.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- EF Core + PostgreSQL -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+
+    <!-- Redis -->
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.10" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+
+    <!-- HTTP Client (AI Backend iletişimi) -->
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+
+    <!-- Auth -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NL2SQL.CoreBackend.Domain\NL2SQL.CoreBackend.Domain.csproj" />
+    <ProjectReference Include="..\NL2SQL.CoreBackend.Application\NL2SQL.CoreBackend.Application.csproj" />
+  </ItemGroup>
+
+</Project>

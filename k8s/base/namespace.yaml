@@ -1,0 +1,10 @@
+# ============================================================
+# Kubernetes Namespace
+# ============================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nl2sql
+  labels:
+    app.kubernetes.io/part-of: nl2sql
+    environment: production

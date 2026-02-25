@@ -1,0 +1,22 @@
+# AI Backend .dockerignore
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+.env
+.env.*
+*.md
+docs/
+tests/
+.pytest_cache/
+.mypy_cache/
+.vscode/
+.idea/
+Dockerfile
+docker-compose*.yml
+*.tar.gz
+*.log
+node_modules/
+.coverage
+htmlcov/
