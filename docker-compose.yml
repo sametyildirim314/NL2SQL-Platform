@@ -220,14 +220,33 @@ services:
       - "--storage.tsdb.retention.time=15d"
       - "--web.enable-lifecycle"
     depends_on:
-      ai-backend:
+      postgres:
         condition: service_healthy
-      core-backend:
+      redis:
         condition: service_healthy
     networks:
       - nl2sql-network
-    profiles:
-      - monitoring
+
+  # ──────────────────────────────────────────────
+  # Grafana – Metrics Visualization
+  # ──────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: nl2sql-grafana
+    restart: unless-stopped
+    volumes:
+      - ./infra/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./infra/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nl2sql-network
 
 # ──────────────────────────────────────────────
 # Volumes

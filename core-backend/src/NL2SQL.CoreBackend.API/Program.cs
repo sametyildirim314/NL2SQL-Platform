@@ -107,9 +107,9 @@ app.UseAuthorization();
 
 // Prometheus metrics
 app.UseHttpMetrics();
+app.UseMetricServer();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
-app.MapMetrics();   // /metrics endpoint
 
 app.Run();

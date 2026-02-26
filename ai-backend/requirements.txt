@@ -23,6 +23,7 @@ redis==5.2.1
 
 # --- Observability ---
 prometheus-client==0.21.1
+prometheus-fastapi-instrumentator==7.0.0
 structlog==24.4.0
 
 # --- Security ---
