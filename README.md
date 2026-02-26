@@ -6,7 +6,59 @@ NL2SQL Platform, kullanıcıların doğal dilde yazdığı veri sorgu taleplerin
 
 Bu proje artık tek bir **Monorepo** yapısında yönetilmektedir. Tüm ekip üyeleri geliştirmelerini bu repository içindeki kendi sorumluluk klasörlerinde yapar ve entegrasyon Docker Compose ile merkezi olarak doğrulanır.
 
-## 2. Ortak Ön Koşullar (Herkesin Kurması Gerekenler)
+## 2. Hızlı Başlangıç ve Ekip Çalışma Rehberi
+
+Projeye yeni katılan veya halihazırda yerelde kod yazmaya başlamış ekip üyeleri için önerilen hızlı entegrasyon akışı aşağıdaki gibidir:
+
+1. **Projeyi bilgisayara çekin (`git clone`)**
+
+```bash
+git clone <repo-url>
+cd "Nurol Teknoloji"
+```
+
+2. **Şifreleri/ortam değişkenlerini ayarlayın (`.env`)**
+
+Linux/macOS:
+
+```bash
+cp .env.example .env
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Not: Windows tarafında `cp` yerine `Copy-Item` kullanılması gerekir.
+
+3. **Sistemi ayağa kaldırın**
+
+```bash
+docker compose up -d --build
+```
+
+Bu komut veritabanı, önbellek ve API servislerini (postgres, redis, ai-backend, core-backend, frontend) otomatik olarak derler ve çalıştırır.
+
+4. **Önceden ayrı klasörlerde yazılan kodları monorepo’ya taşıyın (Migration)**
+
+- Daha önce bağımsız klasörlerde geliştirdiğiniz kodları, bu repo içindeki ilgili klasöre kopyalayıp yapıştırın.
+- Hedef klasörler:
+  - AI geliştirmeleri: `ai-backend`
+  - Core backend geliştirmeleri: `core-backend`
+  - Frontend geliştirmeleri: `frontend`
+- Taşıma sonrası geliştirmelere yalnızca bu monorepo üzerinden devam edin.
+
+5. **Git akışı ve kurallar (çok önemli)**
+
+- `main` branch’ine doğrudan push kapalıdır.
+- Her geliştirici Jira görevine göre yeni bir branch açmalıdır.
+  - Örnek: `NL2SQL-15-veritabani-baglantisi`
+- Geliştirme tamamlandığında Pull Request (PR) açılmalıdır.
+- PR, CI pipeline üzerindeki otomatik testlerden yeşil onay almadan ana projeye dahil edilemez.
+
+## 3. Ortak Ön Koşullar (Herkesin Kurması Gerekenler)
 
 Projeye başlamadan önce her ekip üyesinin aşağıdaki araçları kurmuş olması gerekir:
 
@@ -42,7 +94,7 @@ Doğrulama:
 wsl --status
 ```
 
-## 3. Klasör Sınırları ve Rol Dağılımı (Kim Nereye Dokunacak?)
+## 4. Klasör Sınırları ve Rol Dağılımı (Kim Nereye Dokunacak?)
 
 Monorepo düzeninde herkes yalnızca kendi sorumluluk alanında geliştirme yapmalıdır.
 
@@ -62,7 +114,7 @@ Monorepo düzeninde herkes yalnızca kendi sorumluluk alanında geliştirme yapm
 - Ekip üyeleri kendi geliştirme klasörleri dışındaki altyapı/orkestrasyon dosyalarına doğrudan müdahale etmemelidir.
 - Çapraz etki yaratabilecek değişiklikler için önce PR üzerinden DevOps değerlendirmesi alınmalıdır.
 
-## 4. Önceden Yazılan Kodları Repoya Aktarma (Migration)
+## 5. Önceden Yazılan Kodları Repoya Aktarma (Migration)
 
 Eğer ekip üyeleri daha önce kendi bilgisayarlarında bağımsız klasörlerde geliştirmeye başladıysa, aşağıdaki adımlarla monorepo yapısına geçmelidir:
 
@@ -81,9 +133,9 @@ cd "Nurol Teknoloji"
 4. Bu aşamadan sonra geliştirmeleri yalnızca monorepo içindeki bu klasörler üzerinden sürdürün.
 5. Eski bağımsız klasörlerde geliştirme yapmayın; tek kaynak monorepo olmalıdır.
 
-## 5. Sistemi Ayağa Kaldırma ve Çalıştırma
+## 6. Sistemi Ayağa Kaldırma ve Çalıştırma
 
-### 5.1 Ortam değişkenlerini hazırlama
+### 6.1 Ortam değişkenlerini hazırlama
 
 Linux/macOS:
 
@@ -99,7 +151,7 @@ Copy-Item .env.example .env
 
 Not: Windows PowerShell’de Linux’taki `cp` komutu yerleşik olarak bulunmadığından `Copy-Item .env.example .env` kullanılmalıdır.
 
-### 5.2 Sistemi çalıştırma
+### 6.2 Sistemi çalıştırma
 
 ```bash
 docker compose up -d --build
@@ -121,9 +173,9 @@ Servis durumunu kontrol etmek için:
 docker compose ps
 ```
 
-## 6. Git Standartları ve İş Akışı
+## 7. Git Standartları ve İş Akışı
 
-### 6.1 Branch açma
+### 7.1 Branch açma
 
 Çalışmaya başlamadan önce `main` branch’ini güncelleyin ve yeni bir feature/fix branch’i açın.
 
@@ -135,7 +187,7 @@ git pull
 git checkout -b NL2SQL-123-yeni-ozellik
 ```
 
-### 6.2 Branch isimlendirme standardı
+### 7.2 Branch isimlendirme standardı
 
 Branch adları görev numarası içermelidir.
 
@@ -144,7 +196,7 @@ Branch adları görev numarası içermelidir.
 - `NL2SQL-245-fix-login`
 - `NL2SQL-310-api-refactor`
 
-### 6.3 Push, Pull Request ve CI akışı
+### 7.3 Push, Pull Request ve CI akışı
 
 1. Değişiklikleri commit edin.
 2. Branch’inizi origin’e pushlayın.
