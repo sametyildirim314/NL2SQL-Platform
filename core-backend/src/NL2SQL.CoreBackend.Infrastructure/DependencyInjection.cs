@@ -34,7 +34,8 @@ public static class DependencyInjection
                         maxRetryDelay: TimeSpan.FromSeconds(10),
                         errorCodesToAdd: null);
                     npgsql.CommandTimeout(30);
-                }));
+                })
+            .UseSnakeCaseNamingConvention());
 
         // ─── Repository & UnitOfWork ───
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
