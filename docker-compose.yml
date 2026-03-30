@@ -96,6 +96,8 @@ services:
       - WORKERS=${AI_WORKERS:-2}
     ports:
       - "${AI_BACKEND_PORT:-8000}:8000"
+    volumes:
+      - chroma_data:/app/.chroma_data
     depends_on:
       postgres:
         condition: service_healthy
@@ -266,6 +268,8 @@ volumes:
   redis_data:
     driver: local
   prometheus_data:
+    driver: local
+  chroma_data:
     driver: local
 
 # ──────────────────────────────────────────────

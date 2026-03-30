@@ -20,7 +20,11 @@ public static class SqlPaginationWrapper
             DatabaseProvider.PostgreSQL or DatabaseProvider.MySql or DatabaseProvider.SqLite =>
                 $"SELECT * FROM ({trimmed}) AS _nl2sql_q LIMIT {take} OFFSET {skip}",
             DatabaseProvider.MsSql =>
-                $"SELECT * FROM ({trimmed}) AS _nl2sql_q ORDER BY (SELECT NULL) OFFSET {skip} ROWS FETCH NEXT {take} ROWS ONLY",
+                System.Text.RegularExpressions.Regex.IsMatch(trimmed, @"\bORDER BY\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase) 
+                    ? (System.Text.RegularExpressions.Regex.IsMatch(trimmed, @"\bTOP\b|\bOFFSET\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase) 
+                        ? trimmed 
+                        : $"{trimmed} OFFSET {skip} ROWS FETCH NEXT {take} ROWS ONLY")
+                    : $"{trimmed} ORDER BY (SELECT NULL) OFFSET {skip} ROWS FETCH NEXT {take} ROWS ONLY",
             DatabaseProvider.Oracle =>
                 $"SELECT * FROM ({trimmed}) _nl2sql_q OFFSET {skip} ROWS FETCH NEXT {take} ROWS ONLY",
             _ =>

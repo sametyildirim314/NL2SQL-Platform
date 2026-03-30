@@ -4,6 +4,7 @@ using System.Text.Json;
 using NL2SQL.CoreBackend.Application.Common.Interfaces;
 using NL2SQL.CoreBackend.Application.Common.Models;
 using NL2SQL.CoreBackend.Application.Common.Models.AIBackend;
+using NL2SQL.CoreBackend.Application.Common.Sql;
 using NL2SQL.CoreBackend.Application.Onboarding.DTOs;
 using NL2SQL.CoreBackend.Domain.Entities;
 
@@ -53,7 +54,7 @@ public sealed class OnboardingMutationHandlers :
         if (string.IsNullOrEmpty(cs))
             return ApiResponse<ExtractSchemaResponseDto>.Fail("Bağlantı dizisi boş.");
 
-        var aiReq = new AIExtractSchemaRequest { DbId = conn.DbId, ConnectionString = cs };
+        var aiReq = new AIExtractSchemaRequest { DbId = conn.DbId, ConnectionString = cs.ToSqlAlchemyUri(conn.Provider) };
 
         AIExtractSchemaResponse ai;
         try

@@ -69,7 +69,7 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
         var aiRequest = new AIGenerateSqlRequest
         {
             DbId = conn.DbId,
-            ConnectionString = conn.ConnectionString,
+            ConnectionString = conn.ConnectionString.ToSqlAlchemyUri(conn.Provider),
             Query = req.Query.Trim(),
             UserId = cmd.UserId.ToString(),
             DryRunLimit = req.DryRunLimit ?? opt.DefaultDryRunLimit

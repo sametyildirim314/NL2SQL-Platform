@@ -26,6 +26,7 @@ sqlalchemy==2.0.36
 asyncpg==0.30.0
 psycopg2-binary==2.9.10
 alembic==1.14.1
+pymssql==2.3.0
 
 # --- Vector Store (RAG) ---
 chromadb>=0.5,<1
