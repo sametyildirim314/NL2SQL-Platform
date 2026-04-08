@@ -120,6 +120,65 @@ async function get(path) {
 }
 
 /**
+ * @param {string} path - API path
+ * @param {Record<string, unknown>} body
+ * @returns {Promise<any>}
+ * @throws {ApiErrorImpl}
+ */
+async function put(path, body) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "PUT",
+    headers: buildHeaders(),
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw parseError(response.status, text);
+  }
+
+  return response.json();
+}
+
+/**
+ * @param {string} path - API path
+ * @returns {Promise<any>}
+ * @throws {ApiErrorImpl}
+ */
+async function del(path) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "DELETE",
+    headers: buildHeaders(),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw parseError(response.status, text);
+  }
+
+  // DELETE may return 204 No Content
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch (_) {
+    return null;
+  }
+}
+
+/**
+ * Unwrap core-backend ApiResponse<T> envelope: { success, message, data }
+ * @param {any} resp
+ * @returns {any}
+ */
+function unwrap(resp) {
+  if (resp == null) return null;
+  if (Object.prototype.hasOwnProperty.call(resp, "data")) return resp.data;
+  if (Object.prototype.hasOwnProperty.call(resp, "Data")) return resp.Data;
+  return resp;
+}
+
+/**
  * @param {{email: string, password: string}} credentials
  * @returns {Promise<any>}
  * @throws {ApiErrorImpl}
@@ -170,5 +229,39 @@ function isAuthenticated() {
   return Boolean(localStorage.getItem(ACCESS_TOKEN_KEY));
 }
 
-export const api = { get, post, login, register, logout, isAuthenticated };
+/* -------- Namespaced helpers -------- */
+
+const databases = {
+  list: async () => unwrap(await get("/databases")) ?? [],
+  getById: async (id) => unwrap(await get(`/databases/${id}`)),
+  create: async (payload) => unwrap(await post("/databases", payload)),
+  update: async (id, payload) => unwrap(await put(`/databases/${id}`, payload)),
+  remove: async (id) => unwrap(await del(`/databases/${id}`)),
+  test: async (id) => unwrap(await post(`/databases/${id}/test`, {})),
+};
+
+const history = {
+  list: async ({ page = 1, pageSize = 20, dbId } = {}) => {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("pageSize", String(pageSize));
+    if (dbId) params.set("dbId", dbId);
+    return unwrap(await get(`/history?${params.toString()}`)) ?? [];
+  },
+  remove: async (id) => unwrap(await del(`/history/${id}`)),
+};
+
+export const api = {
+  get,
+  post,
+  put,
+  delete: del,
+  login,
+  register,
+  logout,
+  isAuthenticated,
+  unwrap,
+  databases,
+  history,
+};
 export { ApiErrorImpl as ApiError };

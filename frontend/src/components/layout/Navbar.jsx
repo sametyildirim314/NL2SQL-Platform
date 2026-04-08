@@ -26,15 +26,10 @@ export default function Navbar() {
 
   const handleQueryAction = (e) => {
     e.preventDefault();
-    if (location.pathname !== "/") {
-      navigate("/");
-      setTimeout(() => {
-        const queryEl = document.getElementById("query");
-        queryEl?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 50);
+    if (api.isAuthenticated()) {
+      navigate("/workspace");
     } else {
-      const queryEl = document.getElementById("query");
-      queryEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+      navigate("/login");
     }
     setMobileOpen(false);
   };
@@ -104,7 +99,7 @@ export default function Navbar() {
             ) : (
               <>
                 <a
-                  href="/#query"
+                  href="/workspace"
                   onClick={handleQueryAction}
                   className="px-5 py-2 rounded-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all hover:shadow-lg"
                 >

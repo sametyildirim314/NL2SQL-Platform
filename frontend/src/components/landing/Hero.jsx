@@ -1,6 +1,13 @@
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { api } from "../../services/api";
 
 export default function Hero() {
+  const navigate = useNavigate();
+  const handleStart = (e) => {
+    e.preventDefault();
+    navigate(api.isAuthenticated() ? "/workspace" : "/login");
+  };
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-violet-900 animate-gradient">
       {/* Background decoration */}
@@ -44,7 +51,8 @@ export default function Hero() {
         {/* CTA buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
-            href="#query"
+            href="/workspace"
+            onClick={handleStart}
             className="group inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-slate-900 font-semibold text-lg hover:bg-blue-50 transition-all hover:shadow-2xl hover:shadow-blue-500/20"
           >
             Hemen Deneyin
