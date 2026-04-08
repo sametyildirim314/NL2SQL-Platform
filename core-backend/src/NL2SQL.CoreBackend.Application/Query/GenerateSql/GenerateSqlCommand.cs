@@ -92,7 +92,6 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
                 ExecutionStatus.Failed,
                 null,
                 ex.Message,
-                null,
                 ct);
             return ApiResponse<GenerateSqlResponse>.Fail("AI servisi şu anda kullanılamıyor.");
         }
@@ -109,7 +108,6 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
                 ExecutionStatus.Failed,
                 null,
                 err,
-                null,
                 ct);
             return ApiResponse<GenerateSqlResponse>.Fail(err);
         }
@@ -126,7 +124,6 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
                 ExecutionStatus.Failed,
                 null,
                 "AI üretilen SQL boş.",
-                null,
                 ct);
             return ApiResponse<GenerateSqlResponse>.Fail("AI üretilen SQL boş.");
         }
@@ -145,7 +142,6 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
                 ExecutionStatus.Rejected,
                 null,
                 validation.Message,
-                null,
                 ct);
 
             return ApiResponse<GenerateSqlResponse>.Ok(new GenerateSqlResponse(
@@ -181,7 +177,6 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
                 ExecutionStatus.Failed,
                 (int?)exec.ElapsedMs,
                 exec.ErrorMessage,
-                null,
                 ct);
 
             return ApiResponse<GenerateSqlResponse>.Ok(new GenerateSqlResponse(
@@ -198,7 +193,6 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
         }
 
         var data = exec.Rows ?? Array.Empty<Dictionary<string, object?>>();
-        var json = JsonSerializer.Serialize(data, JsonOptions);
 
         await SaveHistoryAsync(
             cmd.UserId,
@@ -209,7 +203,6 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
             ExecutionStatus.Success,
             (int)exec.ElapsedMs,
             null,
-            json,
             ct);
 
         return ApiResponse<GenerateSqlResponse>.Ok(new GenerateSqlResponse(
@@ -274,7 +267,6 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
         ExecutionStatus status,
         int? executionTimeMs,
         string? errorMessage,
-        string? resultJson,
         CancellationToken ct)
     {
         var h = new QueryHistory
@@ -286,8 +278,7 @@ public sealed class GenerateSqlCommandHandler : IRequestHandler<GenerateSqlComma
             Explanation = explanation,
             ExecutionStatus = status,
             ExecutionTimeMs = executionTimeMs,
-            ErrorMessage = errorMessage,
-            ResultDataJson = resultJson
+            ErrorMessage = errorMessage
         };
         await _uow.QueryHistories.AddAsync(h, ct);
         await _uow.SaveChangesAsync(ct);

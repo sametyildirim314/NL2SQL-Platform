@@ -13,7 +13,6 @@ public class QueryHistory : BaseEntity
     public ExecutionStatus ExecutionStatus { get; set; } = ExecutionStatus.Pending;
     public int? ExecutionTimeMs { get; set; }
     public string? ErrorMessage { get; set; }
-    public string? ResultDataJson { get; set; }
 
     public User User { get; set; } = null!;
 }

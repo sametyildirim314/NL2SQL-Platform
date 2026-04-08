@@ -1,0 +1,390 @@
+﻿
+{
+  "dbId": "adventureworks",
+  "tables": [
+    {
+      "name": "dbo.AWBuildVersion",
+      "columns": [
+        "SystemInformationID TINYINT NOT NULL",
+        "Database Version NVARCHAR(25) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+        "VersionDate DATETIME NOT NULL",
+        "ModifiedDate DATETIME NOT NULL"
+      ],
+      "humanDescription": "Sistem versiyon bilgileri.",
+      "businessRules": "Genellikle veri sorgulamalarında kullanılmaz."
+    },
+    {
+      "name": "dbo.DatabaseLog",
+      "columns": [
+        "DatabaseLogID INTEGER NOT NULL",
+        "PostTime DATETIME NOT NULL",
+        "DatabaseUser NVARCHAR(128)",
+        "Event NVARCHAR(128)",
+        "Schema NVARCHAR(128)",
+        "Object NVARCHAR(128)",
+        "TSQL NVARCHAR NOT NULL",
+        "XmlEvent XML NOT NULL"
+      ],
+      "humanDescription": "Veritabanı bazlı hata ve logları tutar.",
+      "businessRules": "Müşteri veya satış analizi için kullanılmaz."
+    },
+    {
+      "name": "dbo.ErrorLog",
+      "columns": [
+        "ErrorLogID INTEGER NOT NULL",
+        "ErrorTime DATETIME NOT NULL",
+        "UserName NVARCHAR(128) NOT NULL",
+        "ErrorNumber INTEGER NOT NULL",
+        "ErrorSeverity INTEGER",
+        "ErrorState INTEGER",
+        "ErrorProcedure NVARCHAR(126)",
+        "ErrorLine INTEGER",
+        "ErrorMessage NVARCHAR(4000) NOT NULL"
+      ],
+      "humanDescription": "Uygulama veya sistemde oluşan hataları listeler.",
+      "businessRules": ""
+    },
+    {
+      "name": "HumanResources.Department",
+      "columns": [
+        "DepartmentID SMALLINT NOT NULL",
+        "Name NVARCHAR(50) NOT NULL",
+        "GroupName NVARCHAR(50) NOT NULL",
+        "ModifiedDate DATETIME NOT NULL"
+      ],
+      "humanDescription": "Şirket içindeki departmanların (ör. Satış, İK, Üretim) isimlerini ve gruplarını tutar.",
+      "businessRules": "Çalışanların hangi departmanda olduğunu bulmak için EmployeeDepartmentHistory tablosu ile birleştirilmelidir."
+    },
+    {
+      "name": "HumanResources.Employee",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL",
+        "NationalIDNumber NVARCHAR(15) NOT NULL",
+        "LoginID NVARCHAR(256) NOT NULL",
+        "OrganizationNode NULL",
+        "OrganizationLevel SMALLINT",
+        "JobTitle NVARCHAR(50) NOT NULL",
+        "BirthDate DATE NOT NULL",
+        "MaritalStatus NCHAR(1) NOT NULL",
+        "Gender NCHAR(1) NOT NULL",
+        "HireDate DATE NOT NULL",
+        "SalariedFlag BIT NOT NULL",
+        "VacationHours SMALLINT NOT NULL",
+        "SickLeaveHours SMALLINT NOT NULL",
+        "CurrentFlag BIT NOT NULL",
+        "rowguid UNIQUEIDENTIFIER NOT NULL",
+        "ModifiedDate DATETIME NOT NULL"
+      ],
+      "humanDescription": "Çalışanların iş ve özlük bilgileri (ünvan, doğum tarihi, cinsiyet, işe giriş tarihi).",
+      "businessRules": "Çalışanın ADINI bulmak için BusinessEntityID üzerinden Person.Person tablosu ile eşleştir. 'CurrentFlag = 1' olanlar aktif çalışanları temsil eder."
+    },
+    {
+      "name": "HumanResources.EmployeeDepartmentHistory",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL",
+        "DepartmentID SMALLINT NOT NULL",
+        "ShiftID TINYINT NOT NULL",
+        "StartDate DATE NOT NULL",
+        "EndDate DATE",
+        "ModifiedDate DATETIME NOT NULL"
+      ],
+      "humanDescription": "Çalışanların hangi tarihte, hangi vardiya ve departmanda çalıştıklarının tarihsel verisi.",
+      "businessRules": "EndDate 'NULL' ise çalışan hala o departmanda (aktif) çalışıyor demektir."
+    },
+    {
+      "name": "HumanResources.EmployeePayHistory",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL",
+        "RateChangeDate DATETIME NOT NULL",
+        "Rate MONEY NOT NULL",
+        "PayFrequency TINYINT NOT NULL",
+        "ModifiedDate DATETIME NOT NULL"
+      ],
+      "humanDescription": "Çalışan maaşları ve ödeme sıklığı geçmişi.",
+      "businessRules": "En güncel maaşı almak için RateChangeDate alanına göre sıralayıp en son tarihi (TOP 1) çekin."
+    },
+    {
+      "name": "HumanResources.JobCandidate",
+      "columns": [
+        "JobCandidateID INTEGER NOT NULL",
+        "BusinessEntityID INTEGER",
+        "Resume XML",
+        "ModifiedDate DATETIME NOT NULL"
+      ],
+      "humanDescription": "İş başvurusunda bulunan adaylar.",
+      "businessRules": "Eğer çalışan olarak işe alınmışsa BusinessEntityID dolu olacaktır, alınmamışsa NULL'dur."
+    },
+    {
+      "name": "HumanResources.Shift",
+      "columns": [
+        "ShiftID TINYINT NOT NULL",
+        "Name NVARCHAR(50) NOT NULL",
+        "StartTime TIME NOT NULL",
+        "EndTime TIME NOT NULL",
+        "ModifiedDate DATETIME NOT NULL"
+      ],
+      "humanDescription": "Çalışma vardiyalarının listesi.",
+      "businessRules": ""
+    },
+    {
+      "name": "Person.Address",
+      "columns": [
+        "AddressID INTEGER NOT NULL",
+        "AddressLine1 NVARCHAR(60) NOT NULL",
+        "AddressLine2 NVARCHAR(60)",
+        "City NVARCHAR(30) NOT NULL",
+        "StateProvinceID INTEGER NOT NULL",
+        "PostalCode NVARCHAR(15) NOT NULL"
+      ],
+      "humanDescription": "Kişi, mağaza veya kurumların fiziksel adres bilgileri (Şehir, sokak, posta kodu vb.).",
+      "businessRules": ""
+    },
+    {
+      "name": "Person.AddressType",
+      "columns": [
+        "AddressTypeID INTEGER NOT NULL",
+        "Name NVARCHAR(50) NOT NULL"
+      ],
+      "humanDescription": "Ev, İş, Fatura adresi gibi adres tipleri.",
+      "businessRules": ""
+    },
+    {
+      "name": "Person.BusinessEntity",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL"
+      ],
+      "humanDescription": "Sistemdeki tüm işletme, çalışan ve müşterilerin ana, temel ID'sini (Parent sınıfını) tutar.",
+      "businessRules": "BusinessEntityID, tablolar arasında ortak anahtar (Foreign Key) olarak kullanılır."
+    },
+    {
+      "name": "Person.BusinessEntityAddress",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL",
+        "AddressID INTEGER NOT NULL",
+        "AddressTypeID INTEGER NOT NULL"
+      ],
+      "humanDescription": "Kişi/Firmalar ile adresleri eşleştiren köprü tablosu.",
+      "businessRules": ""
+    },
+    {
+      "name": "Person.ContactType",
+      "columns": [
+        "ContactTypeID INTEGER NOT NULL",
+        "Name NVARCHAR(50) NOT NULL"
+      ],
+      "humanDescription": "İletişim türlerini (Örn: Yönetici, Satış Temsilcisi vb.) tutar.",
+      "businessRules": ""
+    },
+    {
+      "name": "Person.CountryRegion",
+      "columns": [
+        "CountryRegionCode NVARCHAR(3) NOT NULL",
+        "Name NVARCHAR(50) NOT NULL"
+      ],
+      "humanDescription": "Ülkeler ve bölgelerin (Örneğin: TR - Türkiye, US - ABD) listesi.",
+      "businessRules": ""
+    },
+    {
+      "name": "Person.EmailAddress",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL",
+        "EmailAddressID INTEGER NOT NULL",
+        "EmailAddress NVARCHAR(50)"
+      ],
+      "humanDescription": "Kişiler ve kurumlar için e-posta adreslerini saklar.",
+      "businessRules": ""
+    },
+    {
+      "name": "Person.Person",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL",
+        "PersonType NCHAR(2) NOT NULL",
+        "NameStyle BIT NOT NULL",
+        "Title NVARCHAR(8)",
+        "FirstName NVARCHAR(50) NOT NULL",
+        "MiddleName NVARCHAR(50)",
+        "LastName NVARCHAR(50) NOT NULL",
+        "Suffix NVARCHAR(10)",
+        "EmailPromotion INTEGER NOT NULL"
+      ],
+      "humanDescription": "Tüm insanların (Çalışan, Müşteri, İletişim Kişisi vb.) isim ve soyisim bilgilerini tutar.",
+      "businessRules": "PersonType kodları: 'IN' (Bireysel Müşteri), 'EM' (Çalışan), 'SP' (Satış Temsilcisi), 'SC' (Mağaza İrtibat Kişisi), 'VC' (Tedarikçi). Ad ve soyadı birleştirmek için FirstName ve LastName kullanılmalıdır."
+    },
+    {
+      "name": "Person.PersonPhone",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL",
+        "PhoneNumber NVARCHAR(25) NOT NULL",
+        "PhoneNumberTypeID INTEGER NOT NULL"
+      ],
+      "humanDescription": "Kişilerin telefon numaraları.",
+      "businessRules": ""
+    },
+    {
+      "name": "Person.StateProvince",
+      "columns": [
+        "StateProvinceID INTEGER NOT NULL",
+        "StateProvinceCode NCHAR(3) NOT NULL",
+        "CountryRegionCode NVARCHAR(3) NOT NULL",
+        "IsOnlyStateProvinceFlag BIT NOT NULL",
+        "Name NVARCHAR(50) NOT NULL",
+        "TerritoryID INTEGER NOT NULL"
+      ],
+      "humanDescription": "Eyalet ve şehirlerin bölgelerini tutar.",
+      "businessRules": "CountryRegionCode kullanarak ülke bilgisi ile birleştirilir."
+    },
+    {
+      "name": "Production.Product",
+      "columns": [
+        "ProductID INTEGER NOT NULL",
+        "Name NVARCHAR(50) NOT NULL",
+        "ProductNumber NVARCHAR(25) NOT NULL",
+        "Color NVARCHAR(15)",
+        "StandardCost MONEY NOT NULL",
+        "ListPrice MONEY NOT NULL",
+        "Size NVARCHAR(5)",
+        "Weight DECIMAL(8, 2)",
+        "DaysToManufacture INTEGER NOT NULL",
+        "ProductSubcategoryID INTEGER",
+        "ProductModelID INTEGER",
+        "SellStartDate DATETIME NOT NULL",
+        "SellEndDate DATETIME",
+        "DiscontinuedDate DATETIME"
+      ],
+      "humanDescription": "Satılan veya üretilen ürünlerin (Bisiklet, kask vb.) bilgileri, fiyatı, rengi ve boyutu.",
+      "businessRules": "Sadece satıştaki güncel ürünleri getirmek için 'SellEndDate IS NULL' veya 'DiscontinuedDate IS NULL' filtrelerini kullan. FinishedGoodsFlag kullanılarak satılabilir ürünler ayrılabilir."
+    },
+    {
+      "name": "Production.ProductCategory",
+      "columns": [
+        "ProductCategoryID INTEGER NOT NULL",
+        "Name NVARCHAR(50) NOT NULL"
+      ],
+      "humanDescription": "Bisiklet, Giyim, Aksesuar gibi ana ürün kategorileri.",
+      "businessRules": ""
+    },
+    {
+      "name": "Production.ProductInventory",
+      "columns": [
+        "ProductID INTEGER NOT NULL",
+        "LocationID SMALLINT NOT NULL",
+        "Shelf NVARCHAR(10) NOT NULL",
+        "Bin TINYINT NOT NULL",
+        "Quantity SMALLINT NOT NULL"
+      ],
+      "humanDescription": "Hangi depoda, hangi rafta kaç adet ürün stokta var sorusunun yanıtı.",
+      "businessRules": "Toplam stok miktarını bulmak için ProductID bazında SUM(Quantity) alınmalıdır."
+    },
+    {
+      "name": "Purchasing.Vendor",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL",
+        "AccountNumber NVARCHAR(15) NOT NULL",
+        "Name NVARCHAR(50) NOT NULL",
+        "CreditRating TINYINT NOT NULL",
+        "PreferredVendorStatus BIT NOT NULL",
+        "ActiveFlag BIT NOT NULL"
+      ],
+      "humanDescription": "Mal alınan toptancı veya tedarikçi firmalar (Vendor).",
+      "businessRules": "Aktif tedarikçiler için ActiveFlag=1 olmalıdır."
+    },
+    {
+      "name": "Sales.Customer",
+      "columns": [
+        "CustomerID INTEGER NOT NULL",
+        "PersonID INTEGER",
+        "StoreID INTEGER",
+        "TerritoryID INTEGER",
+        "AccountNumber VARCHAR(10) NOT NULL"
+      ],
+      "humanDescription": "Müşterilerin sipariş verebilmesi için sahip olduğu ana Müşteri ID (Customer) bilgileri. Müşterilerin isimleri burada değil, PersonID üzerinden gidilen Person.Person tablosundadır.",
+      "businessRules": "Eğer PersonID boş değilse (NOT NULL) bireysel bir perakende müşterisidir. StoreID doluysa toptan sipariş veren bir mağazadır."
+    },
+    {
+      "name": "Sales.SalesOrderDetail",
+      "columns": [
+        "SalesOrderID INTEGER NOT NULL",
+        "SalesOrderDetailID INTEGER NOT NULL",
+        "OrderQty SMALLINT NOT NULL",
+        "ProductID INTEGER NOT NULL",
+        "SpecialOfferID INTEGER NOT NULL",
+        "UnitPrice MONEY NOT NULL",
+        "UnitPriceDiscount MONEY NOT NULL",
+        "LineTotal NUMERIC(38, 6) NOT NULL"
+      ],
+      "humanDescription": "Verilen her bir siparişin içindeki ürün satırları (Siparişteki her bir ürün için miktar, birim fiyat, indirim, toplam satır fiyatı).",
+      "businessRules": "Bir ürünün kaç defa satıldığını bulmak için OrderQty kolonu toplanmalıdır. Toplam kazancı hesaplamak için LineTotal SUM alınmalıdır."
+    },
+    {
+      "name": "Sales.SalesOrderHeader",
+      "columns": [
+        "SalesOrderID INTEGER NOT NULL",
+        "RevisionNumber TINYINT NOT NULL",
+        "OrderDate DATETIME NOT NULL",
+        "DueDate DATETIME NOT NULL",
+        "ShipDate DATETIME",
+        "Status TINYINT NOT NULL",
+        "OnlineOrderFlag BIT NOT NULL",
+        "SalesOrderNumber NVARCHAR(25) NOT NULL",
+        "CustomerID INTEGER NOT NULL",
+        "SalesPersonID INTEGER",
+        "TerritoryID INTEGER",
+        "SubTotal MONEY NOT NULL",
+        "TaxAmt MONEY NOT NULL",
+        "Freight MONEY NOT NULL",
+        "TotalDue MONEY NOT NULL"
+      ],
+      "humanDescription": "Müşterilerin oluşturduğu sipariş fişlerinin (faturaların) genel başlıkları.",
+      "businessRules": "Toplam geliri hesaplarken SubTotal sütunu kullanılmalıdır (vergiler dahil değildir, sadece ürün bedeli). OnlineOrderFlag = 1 ise internetten sipariş, 0 ise bayiden sipariştir."
+    },
+    {
+      "name": "Sales.SalesPerson",
+      "columns": [
+        "BusinessEntityID INTEGER NOT NULL",
+        "TerritoryID INTEGER",
+        "SalesQuota MONEY",
+        "Bonus MONEY NOT NULL",
+        "CommissionPct SMALLMONEY NOT NULL",
+        "SalesYTD MONEY NOT NULL",
+        "SalesLastYear MONEY NOT NULL"
+      ],
+      "humanDescription": "Satış temsilcilerinin (elemanlarının) sahip olduğu kota, prim ve komisyon bilgileri.",
+      "businessRules": "Kişi adını almak için BusinessEntityID üzerinden Person.Person ile birleştirilir. SalesYTD o yılki (Year to Date) mevcut toplam satış miktarlarıdır."
+    },
+    {
+      "name": "Sales.SalesTerritory",
+      "columns": [
+        "TerritoryID INTEGER NOT NULL",
+        "Name NVARCHAR(50) NOT NULL",
+        "CountryRegionCode NVARCHAR(3) NOT NULL",
+        "Group NVARCHAR(50) NOT NULL",
+        "SalesYTD MONEY NOT NULL"
+      ],
+      "humanDescription": "Satış yapılan kıta ve bölgeler (Kuzey Amerika, Avrupa vb.).",
+      "businessRules": ""
+    }
+  ],
+  "fewShotExamples": [
+    {
+      "question": "Bana isimlerine (ad ve soyadına) göre tüm çalışanları listele",
+      "sql": "SELECT p.FirstName, p.LastName FROM HumanResources.Employee e INNER JOIN Person.Person p ON e.BusinessEntityID = p.BusinessEntityID"
+    },
+    {
+      "question": "Şu ana kadar en çok ürün siparişi veren ilk 5 müşterinin adını ve toplam harcadığı bedeli (SubTotal) getir",
+      "sql": "SELECT TOP 5 p.FirstName, p.LastName, SUM(soh.SubTotal) AS TotalSpent FROM Sales.SalesOrderHeader soh INNER JOIN Sales.Customer c ON soh.CustomerID = c.CustomerID INNER JOIN Person.Person p ON c.PersonID = p.BusinessEntityID GROUP BY p.FirstName, p.LastName ORDER BY TotalSpent DESC"
+    },
+    {
+      "question": "Stokta (Quantity) bulunan ürün çeşitlerini adıyla listele ve stok sayısını getir",
+      "sql": "SELECT p.Name, SUM(pi.Quantity) AS StokMiktar FROM Production.ProductInventory pi INNER JOIN Production.Product p ON pi.ProductID = p.ProductID GROUP BY p.Name ORDER BY StokMiktar DESC"
+    },
+    {
+      "question": "2011 yılında yapılan toplam internet satışı gelirini (SubTotal üzerinden) getir",
+      "sql": "SELECT SUM(SubTotal) FROM Sales.SalesOrderHeader WHERE OnlineOrderFlag = 1 AND YEAR(OrderDate) = 2011"
+    },
+    {
+      "question": "Bisiklet (Bicycles) kategorisindeki ürünleri ekrana bas",
+      "sql": "SELECT p.Name FROM Production.Product p INNER JOIN Production.ProductSubcategory psc ON p.ProductSubcategoryID = psc.ProductSubcategoryID INNER JOIN Production.ProductCategory pc ON psc.ProductCategoryID = pc.ProductCategoryID WHERE pc.Name = 'Bicycles'"
+    }
+  ]
+}
+

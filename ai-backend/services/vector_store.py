@@ -91,10 +91,10 @@ def _embedding_network_context():
 def _get_client() -> chromadb.ClientAPI:
     global _client
     if _client is None:
-        _client = chromadb.Client(
-            ChromaSettings(
+        _client = chromadb.PersistentClient(
+            path=settings.CHROMA_PERSIST_DIR,
+            settings=ChromaSettings(
                 anonymized_telemetry=False,
-                persist_directory=settings.CHROMA_PERSIST_DIR,
             )
         )
     return _client

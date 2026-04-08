@@ -50,7 +50,6 @@ public class AppDbContext : DbContext
             entity.Property(e => e.NaturalLanguageQuery).IsRequired();
             entity.Property(e => e.DbId).HasMaxLength(100);
             entity.Property(e => e.ExecutionStatus).HasConversion<string>().HasMaxLength(20);
-            entity.Property(e => e.ResultDataJson).HasColumnType("jsonb");
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.CreatedAt).IsDescending();
 

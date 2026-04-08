@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Database } from "lucide-react";
+import { api } from "../../services/api";
 
 const navLinks = [
   { label: "Nasıl Çalışır", href: "#how-it-works" },
@@ -13,12 +14,47 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const isAuthenticated = api.isAuthenticated();
 
   const handleNavClick = (e, href) => {
     if (location.pathname !== "/") {
       e.preventDefault();
       navigate("/" + href);
     }
+    setMobileOpen(false);
+  };
+
+  const handleQueryAction = (e) => {
+    e.preventDefault();
+    if (location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        const queryEl = document.getElementById("query");
+        queryEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    } else {
+      const queryEl = document.getElementById("query");
+      queryEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    setMobileOpen(false);
+  };
+
+  const handleLoginAction = (e) => {
+    e.preventDefault();
+    navigate("/login");
+    setMobileOpen(false);
+  };
+
+  const handleRegisterAction = (e) => {
+    e.preventDefault();
+    navigate("/register");
+    setMobileOpen(false);
+  };
+
+  const handleLogoutAction = (e) => {
+    e.preventDefault();
+    api.logout();
+    navigate("/");
     setMobileOpen(false);
   };
 
@@ -48,13 +84,41 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
-            <a
-              href="#query"
-              onClick={(e) => handleNavClick(e, "#query")}
-              className="px-5 py-2 rounded-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all hover:shadow-lg"
-            >
-              Sorgu Yap
-            </a>
+            {!isAuthenticated ? (
+              <>
+                <a
+                  href="/login"
+                  onClick={handleLoginAction}
+                  className="px-5 py-2 rounded-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all hover:shadow-lg"
+                >
+                  Giriş Yap
+                </a>
+                <a
+                  href="/register"
+                  onClick={handleRegisterAction}
+                  className="px-5 py-2 rounded-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all hover:shadow-lg"
+                >
+                  Kayıt Ol
+                </a>
+              </>
+            ) : (
+              <>
+                <a
+                  href="/#query"
+                  onClick={handleQueryAction}
+                  className="px-5 py-2 rounded-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all hover:shadow-lg"
+                >
+                  Sorgu Yap
+                </a>
+                <a
+                  href="/"
+                  onClick={handleLogoutAction}
+                  className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+                >
+                  Çıkış Yap
+                </a>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -81,13 +145,41 @@ export default function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <a
-                href="#query"
-                onClick={(e) => handleNavClick(e, "#query")}
-                className="mx-2 mt-2 px-5 py-2.5 rounded-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all"
-              >
-                Sorgu Yap
-              </a>
+              {!isAuthenticated ? (
+                <>
+                  <a
+                    href="/login"
+                    onClick={handleLoginAction}
+                    className="mx-2 mt-2 px-5 py-2.5 rounded-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all"
+                  >
+                    Giriş Yap
+                  </a>
+                  <a
+                    href="/register"
+                    onClick={handleRegisterAction}
+                    className="mx-2 mt-2 px-5 py-2.5 rounded-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all"
+                  >
+                    Kayıt Ol
+                  </a>
+                </>
+              ) : (
+                <>
+                  <a
+                    href="/#query"
+                    onClick={handleQueryAction}
+                    className="mx-2 mt-2 px-5 py-2.5 rounded-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all"
+                  >
+                    Sorgu Yap
+                  </a>
+                  <a
+                    href="/"
+                    onClick={handleLogoutAction}
+                    className="text-base font-medium text-slate-600 hover:text-blue-600 transition-colors px-2"
+                  >
+                    Çıkış Yap
+                  </a>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -47,8 +47,8 @@ RUN rm -rf tests/ docs/ .git/ __pycache__/ *.md
 # Uncomment and adapt when model download logic is ready:
 # RUN python -c "from app.model_loader import preload_models; preload_models()"
 
-# Ownership
-RUN chown -R appuser:appgroup /app
+# Ownership + pre-create ChromaDB persist dir with correct permissions
+RUN mkdir -p /app/.chroma_data && chown -R appuser:appgroup /app
 
 USER appuser
 

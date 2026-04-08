@@ -1,4 +1,7 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+const ACCESS_TOKEN_KEY = "token";
+const REFRESH_TOKEN_KEY = "refreshToken";
+const USER_KEY = "user";
 
 /**
  * @typedef {Object} ApiError
@@ -35,9 +38,13 @@ function parseError(status, bodyText) {
     const json = JSON.parse(bodyText);
     message =
       json.message ||
+      json.Message ||
       json.error ||
+      json.Error ||
       json.error_message ||
+      json.errorMessage ||
       json.detail ||
+      json.Detail ||
       (typeof json.title === "string" ? json.title : null) ||
       message;
 
@@ -54,6 +61,10 @@ function parseError(status, bodyText) {
     }
   }
 
+  if (status === 401 && message === `İstek başarısız: ${status}`) {
+    message = "Giriş bilgileri hatalı. E-posta ve şifrenizi kontrol edin.";
+  }
+
   return new ApiErrorImpl(status, message, fieldErrors);
 }
 
@@ -63,7 +74,7 @@ function parseError(status, bodyText) {
  */
 function buildHeaders() {
   const headers = { "Content-Type": "application/json" };
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
   if (token) headers["Authorization"] = `Bearer ${token}`;
   return headers;
 }
@@ -108,5 +119,56 @@ async function get(path) {
   return response.json();
 }
 
-export const api = { get, post };
+/**
+ * @param {{email: string, password: string}} credentials
+ * @returns {Promise<any>}
+ * @throws {ApiErrorImpl}
+ */
+async function login(credentials) {
+  const response = await post("/auth/login", credentials);
+  persistAuthResponse(response);
+  return response;
+}
+
+/**
+ * @param {{email: string, password: string, fullName: string}} payload
+ * @returns {Promise<any>}
+ * @throws {ApiErrorImpl}
+ */
+async function register(payload) {
+  const response = await post("/auth/register", payload);
+  persistAuthResponse(response);
+  return response;
+}
+
+/**
+ * @param {any} response
+ */
+function persistAuthResponse(response) {
+  const payload = response?.data ?? response?.Data ?? response;
+
+  if (!payload?.accessToken) {
+    throw new ApiErrorImpl(500, "Sunucudan geçerli bir erişim anahtarı alınamadı.");
+  }
+
+  localStorage.setItem(ACCESS_TOKEN_KEY, payload.accessToken);
+  if (payload.refreshToken) {
+    localStorage.setItem(REFRESH_TOKEN_KEY, payload.refreshToken);
+  }
+  if (payload.user) {
+    localStorage.setItem(USER_KEY, JSON.stringify(payload.user));
+  }
+}
+
+function logout() {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+}
+
+function isAuthenticated() {
+  return Boolean(localStorage.getItem(ACCESS_TOKEN_KEY));
+}
+
+export const api = { get, post, login, register, logout, isAuthenticated };
 export { ApiErrorImpl as ApiError };

@@ -18,11 +18,18 @@ export default function QueryInterface() {
   // Backend endpoint'i için zorunlu: GenerateSqlRequest.DbId
   // UI'de seçim ekranı yok; bu yüzden env/localStorage ile override edilebilir.
   const dbId =
-    localStorage.getItem("dbId") || import.meta.env.VITE_DB_ID || "nl2sql";
+    localStorage.getItem("dbId") || import.meta.env.VITE_DB_ID || "adventureworks";
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+    if (messages.length === 0) return;
+    const lastMessage = messages[messages.length - 1];
+
+    // Kullanıcı mesajında veya loading başlangıcında sayfayı kaydırma;
+    // yalnızca gerçek yanıt/hata geldiğinde aşağı in.
+    if (lastMessage.role === "user") return;
+
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [messages]);
 
   const handleInput = (e) => {
     setQuestion(e.target.value);
@@ -37,6 +44,16 @@ export default function QueryInterface() {
     e.preventDefault();
     const trimmed = question.trim();
     if (!trimmed || loading) return;
+
+    if (!api.isAuthenticated()) {
+      const warnMsg = "Öncelikle giriş yapınız.";
+      setMessages((prev) => [
+        ...prev,
+        { role: "error", content: warnMsg, fieldErrors: null },
+      ]);
+      toast.error(warnMsg);
+      return;
+    }
 
     const userMsg = { role: "user", content: trimmed };
     setMessages((prev) => [...prev, userMsg]);
