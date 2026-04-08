@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Zap, Loader2, Database as DatabaseIcon, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Zap,
+  Loader2,
+  Database as DatabaseIcon,
+  RefreshCw,
+  TableProperties,
+} from "lucide-react";
 import { useDatabase } from "../../context/DatabaseContext";
 import { api, ApiError } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
@@ -9,6 +19,7 @@ import DeleteConfirmModal from "./DeleteConfirmModal";
 export default function DatabasesPage() {
   const { databases, loading, refresh } = useDatabase();
   const toast = useToast();
+  const navigate = useNavigate();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
@@ -140,6 +151,13 @@ export default function DatabasesPage() {
                             ) : (
                               <Zap className="w-4 h-4" />
                             )}
+                          </IconBtn>
+                          <IconBtn
+                            label="Şemayı Görüntüle / Çıkar"
+                            onClick={() => navigate(`/databases/${encodeURIComponent(db.dbId)}/schema`)}
+                            variant="blue"
+                          >
+                            <TableProperties className="w-4 h-4" />
                           </IconBtn>
                           <IconBtn label="Düzenle" onClick={() => openEdit(db)}>
                             <Pencil className="w-4 h-4" />

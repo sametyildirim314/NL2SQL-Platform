@@ -31,7 +31,9 @@ export default function HistoryPanel() {
     } finally {
       setLoading(false);
     }
-  }, [scope, selectedDbId, toast]);
+    // toast is stable from ToastActionsContext, intentionally excluded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scope, selectedDbId]);
 
   useEffect(() => {
     load();

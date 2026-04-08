@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
-import { SendHorizontal, Database, User, Loader2, Sparkles, AlertCircle } from "lucide-react";
+import { useRef, useEffect } from "react";
+import { SendHorizontal, Database, User, Loader2, Sparkles, AlertCircle, Plus } from "lucide-react";
 import SqlHighlight from "../shared/SqlHighlight";
 import ResultTable from "./ResultTable";
 import { api } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
 import { useDatabase } from "../../context/DatabaseContext";
+import { useQuery } from "../../context/QueryContext";
 
 /**
  * Full-height GPT-style chat interface for NL → SQL queries.
@@ -13,9 +14,15 @@ import { useDatabase } from "../../context/DatabaseContext";
  * @param {{ initialQuery?: string }} props
  */
 export default function QueryInterface({ initialQuery = "" }) {
-  const [question, setQuestion] = useState(initialQuery);
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const {
+    messages,
+    question,
+    loading,
+    setQuestion,
+    setLoading,
+    appendMessage,
+    clearConversation,
+  } = useQuery();
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const toast = useToast();
@@ -33,6 +40,8 @@ export default function QueryInterface({ initialQuery = "" }) {
   // External callers can preset the input via initialQuery
   useEffect(() => {
     if (initialQuery) setQuestion(initialQuery);
+    // setQuestion is stable from context (useCallback-free useState setter)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]);
 
   const handleInput = (e) => {
@@ -51,10 +60,7 @@ export default function QueryInterface({ initialQuery = "" }) {
 
     if (!api.isAuthenticated()) {
       const warnMsg = "Öncelikle giriş yapınız.";
-      setMessages((prev) => [
-        ...prev,
-        { role: "error", content: warnMsg, fieldErrors: null },
-      ]);
+      appendMessage({ role: "error", content: warnMsg, fieldErrors: null });
       toast.error(warnMsg);
       return;
     }
@@ -65,8 +71,7 @@ export default function QueryInterface({ initialQuery = "" }) {
       return;
     }
 
-    const userMsg = { role: "user", content: trimmed };
-    setMessages((prev) => [...prev, userMsg]);
+    appendMessage({ role: "user", content: trimmed });
     setQuestion("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
@@ -77,17 +82,15 @@ export default function QueryInterface({ initialQuery = "" }) {
         dbId: selectedDbId,
       });
       const generatePayload = resp?.data ?? resp?.Data ?? resp;
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", data: generatePayload },
-      ]);
+      appendMessage({ role: "assistant", data: generatePayload });
       toast.success("SQL sorgusu başarıyla üretildi.");
     } catch (err) {
       const errorMsg = err.message || "Sunucuya ulaşırken bir hata oluştu.";
-      setMessages((prev) => [
-        ...prev,
-        { role: "error", content: errorMsg, fieldErrors: err.fieldErrors || null },
-      ]);
+      appendMessage({
+        role: "error",
+        content: errorMsg,
+        fieldErrors: err.fieldErrors || null,
+      });
       toast.error(errorMsg);
     } finally {
       setLoading(false);
@@ -125,6 +128,19 @@ export default function QueryInterface({ initialQuery = "" }) {
               <p className="text-xs text-slate-500 mt-0.5">Sorgu yapmak için bir veritabanı seçin.</p>
             )}
           </div>
+
+          {messages.length > 0 && (
+            <button
+              type="button"
+              onClick={clearConversation}
+              disabled={loading}
+              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 bg-white/60 backdrop-blur border border-blue-200/70 hover:bg-blue-50 hover:border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              title="Konuşmayı temizle"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Yeni Sorgu
+            </button>
+          )}
         </div>
       </div>
 

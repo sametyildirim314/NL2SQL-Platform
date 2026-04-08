@@ -241,14 +241,53 @@ const databases = {
 };
 
 const history = {
+  /**
+   * Backend wraps the rows in PaginatedResponse<QueryHistoryDto>:
+   *   { items: [...], pageNumber, pageSize, totalCount }
+   * The outer ApiResponse envelope is removed by `unwrap()`; we then peel
+   * the paginated layer too and return a plain array, which is what every
+   * caller expects today. If callers need pagination metadata later we can
+   * expose a sibling method.
+   */
   list: async ({ page = 1, pageSize = 20, dbId } = {}) => {
     const params = new URLSearchParams();
     params.set("page", String(page));
     params.set("pageSize", String(pageSize));
     if (dbId) params.set("dbId", dbId);
-    return unwrap(await get(`/history?${params.toString()}`)) ?? [];
+    const payload = unwrap(await get(`/history?${params.toString()}`));
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.items)) return payload.items;
+    if (Array.isArray(payload?.Items)) return payload.Items;
+    return [];
   },
+  getById: async (id) => unwrap(await get(`/history/${id}`)),
   remove: async (id) => unwrap(await del(`/history/${id}`)),
+};
+
+const onboarding = {
+  /**
+   * Live veritabanından şemayı çıkarır (AI Backend'e proxy).
+   * @param {string} dbId
+   * @param {string|null} [connectionString] - boş bırakılırsa kayıtlı bağlantı kullanılır
+   */
+  extract: async (dbId, connectionString = null) =>
+    unwrap(await post("/onboarding/extract", { dbId, connectionString })),
+
+  /**
+   * Zenginleştirilmiş şemayı vector store'a kaydeder.
+   * @param {string} dbId
+   * @param {Array<{name:string, columns:string[], humanDescription:string, businessRules:string}>} tables
+   * @param {Array<object>} [fewShotExamples]
+   */
+  register: async (dbId, tables, fewShotExamples = []) =>
+    unwrap(await post("/onboarding/register", { dbId, tables, fewShotExamples })),
+
+  /**
+   * PostgreSQL cache'inden saklı şemayı döndürür. 404 fırlatabilir.
+   * @param {string} dbId
+   */
+  getCachedSchema: async (dbId) =>
+    unwrap(await get(`/onboarding/schema/${encodeURIComponent(dbId)}`)),
 };
 
 export const api = {
@@ -263,5 +302,6 @@ export const api = {
   unwrap,
   databases,
   history,
+  onboarding,
 };
 export { ApiErrorImpl as ApiError };

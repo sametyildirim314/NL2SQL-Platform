@@ -57,7 +57,9 @@ export function DatabaseProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, [selectedDbId, setSelectedDbId, toast]);
+    // toast is stable from ToastActionsContext, intentionally excluded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDbId, setSelectedDbId]);
 
   useEffect(() => {
     if (api.isAuthenticated()) {

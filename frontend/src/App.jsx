@@ -10,9 +10,11 @@ import CursorFollower from "./components/shared/CursorFollower";
 import ToastContainer from "./components/shared/ToastContainer";
 import RequireAuth from "./components/auth/RequireAuth";
 import { DatabaseProvider } from "./context/DatabaseContext";
+import { QueryProvider } from "./context/QueryContext";
 import WorkspaceLayout from "./components/workspace/WorkspaceLayout";
 import WorkspacePage from "./components/workspace/WorkspacePage";
 import DatabasesPage from "./components/databases/DatabasesPage";
+import DatabaseSchemaPage from "./components/databases/DatabaseSchemaPage";
 import HistoryPanel from "./components/history/HistoryPanel";
 
 export default function App() {
@@ -37,21 +39,24 @@ export default function App() {
   if (isAppShell) {
     return (
       <DatabaseProvider>
-        <ToastContainer />
-        <Routes>
-          <Route
-            element={
-              <RequireAuth>
-                <WorkspaceLayout />
-              </RequireAuth>
-            }
-          >
-            <Route path="/workspace" element={<WorkspacePage />} />
-            <Route path="/workspace/history" element={<HistoryPanel />} />
-            <Route path="/databases" element={<DatabasesPage />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/workspace" replace />} />
-        </Routes>
+        <QueryProvider>
+          <ToastContainer />
+          <Routes>
+            <Route
+              element={
+                <RequireAuth>
+                  <WorkspaceLayout />
+                </RequireAuth>
+              }
+            >
+              <Route path="/workspace" element={<WorkspacePage />} />
+              <Route path="/workspace/history" element={<HistoryPanel />} />
+              <Route path="/databases" element={<DatabasesPage />} />
+              <Route path="/databases/:dbId/schema" element={<DatabaseSchemaPage />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/workspace" replace />} />
+          </Routes>
+        </QueryProvider>
       </DatabaseProvider>
     );
   }
