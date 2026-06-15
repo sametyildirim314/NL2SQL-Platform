@@ -1,11 +1,12 @@
 import { useRef, useEffect } from "react";
-import { SendHorizontal, Database, User, Loader2, Sparkles, AlertCircle, Plus } from "lucide-react";
+import { SendHorizontal, Database, User, Loader2, Sparkles, AlertCircle, Plus, Download } from "lucide-react";
 import SqlHighlight from "../shared/SqlHighlight";
 import ResultTable from "./ResultTable";
 import { api } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
 import { useDatabase } from "../../context/DatabaseContext";
 import { useQuery } from "../../context/QueryContext";
+import { downloadAsCsv } from "../../utils/exportUtils";
 
 /**
  * Full-height GPT-style chat interface for NL → SQL queries.
@@ -186,11 +187,10 @@ export default function QueryInterface({ initialQuery = "" }) {
         <div className="max-w-5xl mx-auto">
           <form
             onSubmit={handleSubmit}
-            className={`flex items-end gap-2 bg-white/60 backdrop-blur rounded-2xl px-4 py-3 border shadow-lg shadow-blue-200/30 transition-all ${
-              noActiveDatabase
-                ? "border-blue-200/60 opacity-70"
-                : "border-blue-200/70 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200/60"
-            }`}
+            className={`flex items-end gap-2 bg-white/60 backdrop-blur rounded-2xl px-4 py-3 border shadow-lg shadow-blue-200/30 transition-all ${noActiveDatabase
+              ? "border-blue-200/60 opacity-70"
+              : "border-blue-200/70 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200/60"
+              }`}
           >
             <textarea
               ref={textareaRef}
@@ -209,11 +209,10 @@ export default function QueryInterface({ initialQuery = "" }) {
             <button
               type="submit"
               disabled={inputDisabled}
-              className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                inputDisabled
-                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-sm"
-              }`}
+              className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${inputDisabled
+                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-sm"
+                }`}
             >
               <SendHorizontal className="w-4 h-4" />
             </button>
@@ -260,7 +259,7 @@ function EmptyState({ noActiveDatabase, hasAnyDatabase, onSelectExample }) {
         Yapay zeka sizin için optimize edilmiş SQL sorgusunu üretsin.
       </p>
       <div className="flex flex-wrap gap-2 justify-center">
-        {["Son 10 kullanıcıyı getir", "Toplam sipariş sayısı", "En çok satan ürün"].map((s) => (
+        {["Son 10 müşterinin adlarını ve soyadlarını listele", "Toplam sipariş sayısını bul", "En çok satan ürün hangisidir"].map((s) => (
           <button
             key={s}
             type="button"
@@ -335,6 +334,10 @@ function MessageBubble({ message }) {
     !Array.isArray(dataRows[0]);
   const tableColumns = isArrayOfObjects ? Object.keys(dataRows[0]) : [];
 
+  // Anlamlı sorgu tespiti (Edge Case ise Export gizlenecek)
+  const isEdgeCase = tableColumns.length === 1 && tableColumns[0] === "HataMesaji";
+  const isMeaningful = isArrayOfObjects && !isEdgeCase;
+
   return (
     <div className="flex items-start gap-3">
       <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 mt-0.5">
@@ -358,11 +361,10 @@ function MessageBubble({ message }) {
 
         {isValidated !== undefined && (
           <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-              isValidated
-                ? "bg-green-100 text-green-700"
-                : "bg-amber-100 text-amber-700"
-            }`}
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${isValidated
+              ? "bg-green-100 text-green-700"
+              : "bg-amber-100 text-amber-700"
+              }`}
           >
             {isValidated ? "Doğrulandı" : "Doğrulanmadı"}
           </span>
@@ -371,8 +373,21 @@ function MessageBubble({ message }) {
         {dataRows != null &&
           !(Array.isArray(dataRows) && dataRows.length === 0) && (
             <div className="bg-white/65 backdrop-blur-xl border border-blue-200/60 rounded-xl overflow-hidden shadow-lg shadow-blue-200/30">
-              <div className="px-4 py-2 bg-blue-100/50 border-b border-blue-200/60 text-xs font-semibold text-blue-700 uppercase tracking-wider">
-                Sonuçlar
+              <div className="px-4 py-2 bg-blue-100/50 border-b border-blue-200/60 flex items-center justify-between">
+                <span className="text-xs font-semibold text-blue-700 uppercase tracking-wider">
+                  Sonuçlar
+                </span>
+                {isMeaningful && (
+                  <button
+                    type="button"
+                    onClick={() => downloadAsCsv(dataRows, tableColumns)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-md hover:bg-slate-50 hover:text-blue-600 hover:border-blue-300 transition-colors shadow-sm"
+                    title="Sonuçları CSV (Excel) olarak indir"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    CSV İndir
+                  </button>
+                )}
               </div>
               <div className="max-h-[420px] overflow-y-auto">
                 <ResultTable

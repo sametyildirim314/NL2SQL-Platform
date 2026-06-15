@@ -1,4 +1,4 @@
-﻿
+
 {
   "dbId": "adventureworks",
   "tables": [
@@ -384,6 +384,34 @@
     {
       "question": "Bisiklet (Bicycles) kategorisindeki ürünleri ekrana bas",
       "sql": "SELECT p.Name FROM Production.Product p INNER JOIN Production.ProductSubcategory psc ON p.ProductSubcategoryID = psc.ProductSubcategoryID INNER JOIN Production.ProductCategory pc ON psc.ProductCategoryID = pc.ProductCategoryID WHERE pc.Name = 'Bicycles'"
+    },
+    {
+      "question": "nasılsın",
+      "sql": "SELECT 'Bu soru veritabanı tabloları ve iş akışıyla (satış, müşteri, ürün vb.) ilgili değildir.' AS HataMesaji"
+    },
+    {
+      "question": "yeşil",
+      "sql": "SELECT 'Lütfen neyi bulmak istediğinizi daha net ifade edin (Örn: Yeşil renkli ürünleri listele).' AS HataMesaji"
+    },
+    {
+      "question": "bana bir fıkra anlat",
+      "sql": "SELECT 'Ben bir veritabanı asistanıyım, yalnızca sistemdeki iş verileriyle ilgili soruları yanıtlayabilirim.' AS HataMesaji"
+    },
+    {
+      "question": "asdasdasd",
+      "sql": "SELECT 'Girdiğiniz ifade anlaşılamadı. Lütfen geçerli ve anlamlı bir sorgu cümlesi yazın.' AS HataMesaji"
+    },
+    {
+      "question": "bütün verileri sil",
+      "sql": "SELECT 'Güvenlik nedeniyle veritabanında silme veya değiştirme (DROP, DELETE, UPDATE) işlemi yapılamaz. Sadece veri okuyabilirim.' AS HataMesaji"
+    },
+    {
+      "question": "sen kimsin",
+      "sql": "SELECT 'Ben NL2SQL platformunun yapay zeka asistanıyım. Veritabanındaki bilgilere doğal dille ulaşmanıza yardımcı olurum.' AS HataMesaji"
+    },
+    {
+      "question": "her şeyi getir",
+      "sql": "SELECT 'Lütfen hangi veriyi (siparişler, müşteriler, ürünler vb.) görmek istediğinizi daha belirgin yazın.' AS HataMesaji"
     }
   ]
 }

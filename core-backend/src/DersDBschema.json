@@ -1,0 +1,638 @@
+{
+    "dbId": "DersDB",
+    "tables": [
+      {
+        "name": "dbo.AdventureWorksDWBuildVersion",
+        "columns": [
+          "DBVersion NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "VersionDate DATETIME"
+        ],
+        "humanDescription": "Veri Ambarı (Data Warehouse) sürüm ve güncelleme tarihlerini tutar.",
+        "businessRules": "Müşteri veya satış analizi raporlarında kullanılmaz, sistemin altyapı takibi içindir."
+      },
+      {
+        "name": "dbo.DatabaseLog",
+        "columns": [
+          "DatabaseLogID INTEGER NOT NULL",
+          "PostTime DATETIME NOT NULL",
+          "DatabaseUser NVARCHAR(128) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "Event NVARCHAR(128) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "Schema NVARCHAR(128) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Object NVARCHAR(128) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "TSQL NVARCHAR COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "XmlEvent XML NOT NULL"
+        ],
+        "humanDescription": "Veritabanında yapılan yapısal (DDL vs.) değişiklikler ve meydana gelen sistem olaylarının log (kayıt) bilgilerini tutar.",
+        "businessRules": "Satış, ürün veya finansal analitik sorgulamalarda kesinlikle kullanılmamalıdır."
+      },
+      {
+        "name": "dbo.DimAccount",
+        "columns": [
+          "AccountKey INTEGER NOT NULL",
+          "ParentAccountKey INTEGER",
+          "AccountCodeAlternateKey INTEGER",
+          "ParentAccountCodeAlternateKey INTEGER",
+          "AccountDescription NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "AccountType NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Operator NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "CustomMembers NVARCHAR(300) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "ValueType NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "CustomMemberOptions NVARCHAR(200) COLLATE \"SQL_Latin1_General_CP1_CI_AS\""
+        ],
+        "humanDescription": "Finansal hesapların (Örn: Bilanço, Gelir Tablosu kalemleri, Vergiler vb.) detaylarını ve hiyerarşisini tutan hesap özet boyutudur.",
+        "businessRules": "Finansal rakamları bulmak için FactFinance tablosundaki hesaplamalarla 'AccountKey' üzerinden birleştirilmesi zorunludur."
+      },
+      {
+        "name": "dbo.DimCurrency",
+        "columns": [
+          "CurrencyKey INTEGER NOT NULL",
+          "CurrencyAlternateKey NCHAR(3) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "CurrencyName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL"
+        ],
+        "humanDescription": "Şirket içi kullanılan tüm para birimlerinin (Örn: USD, EUR, TRY) isimlerini ve üç harfli kodlarını tutar.",
+        "businessRules": "Satış veya muhasebe verilerini belirli bir para birimine göre filtrelerken 'CurrencyKey' ile diğer tablolarla bağlanır."
+      },
+      {
+        "name": "dbo.DimCustomer",
+        "columns": [
+          "CustomerKey INTEGER NOT NULL",
+          "GeographyKey INTEGER",
+          "CustomerAlternateKey NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "Title NVARCHAR(8) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "FirstName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "MiddleName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "LastName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "NameStyle BIT",
+          "BirthDate DATE",
+          "MaritalStatus NCHAR(1) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Suffix NVARCHAR(10) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Gender NVARCHAR(1) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EmailAddress NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "YearlyIncome MONEY",
+          "TotalChildren TINYINT",
+          "NumberChildrenAtHome TINYINT",
+          "EnglishEducation NVARCHAR(40) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SpanishEducation NVARCHAR(40) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "FrenchEducation NVARCHAR(40) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EnglishOccupation NVARCHAR(100) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SpanishOccupation NVARCHAR(100) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "FrenchOccupation NVARCHAR(100) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "HouseOwnerFlag NCHAR(1) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "NumberCarsOwned TINYINT",
+          "AddressLine1 NVARCHAR(120) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "AddressLine2 NVARCHAR(120) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Phone NVARCHAR(20) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "DateFirstPurchase DATE",
+          "CommuteDistance NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\""
+        ],
+        "humanDescription": "Bireysel (perakende) müşterilerin kişisel, iletişim bilgileri ile gelir, medeni hal, cinsiyet, meslek gibi demografik profillerini tutar.",
+        "businessRules": "Müşterinin tam adını almak için her zaman 'FirstName' (Ad) ve 'LastName' (Soyad) sütunları birleştirilmelidir. İnternet alışverişlerini (FactInternetSales) listelemek için 'CustomerKey' ile eşleştirilir."
+      },
+      {
+        "name": "dbo.DimDate",
+        "columns": [
+          "DateKey INTEGER NOT NULL",
+          "FullDateAlternateKey DATE NOT NULL",
+          "DayNumberOfWeek TINYINT NOT NULL",
+          "EnglishDayNameOfWeek NVARCHAR(10) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SpanishDayNameOfWeek NVARCHAR(10) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "FrenchDayNameOfWeek NVARCHAR(10) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "DayNumberOfMonth TINYINT NOT NULL",
+          "DayNumberOfYear SMALLINT NOT NULL",
+          "WeekNumberOfYear TINYINT NOT NULL",
+          "EnglishMonthName NVARCHAR(10) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SpanishMonthName NVARCHAR(10) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "FrenchMonthName NVARCHAR(10) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "MonthNumberOfYear TINYINT NOT NULL",
+          "CalendarQuarter TINYINT NOT NULL",
+          "CalendarYear SMALLINT NOT NULL",
+          "CalendarSemester TINYINT NOT NULL",
+          "FiscalQuarter TINYINT NOT NULL",
+          "FiscalYear SMALLINT NOT NULL",
+          "FiscalSemester TINYINT NOT NULL"
+        ],
+        "humanDescription": "Zaman ve takvim filtrelemeleri (Yıl, Ay, Çeyrek, Hafta, Gün vb.) yapmak için kullanılan detaylı tarih boyut tablosudur.",
+        "businessRules": "Tüm Fact (Satış, Stok, Finans) tablolarındaki 'XYZDateKey' (Örn: OrderDateKey, DueDateKey, ShipDateKey) sütunlarıyla bağlanarak çeyreklik veya yıllık analiz (CalendarYear) veya aylık analiz (EnglishMonthName) için kullanılır."
+      },
+      {
+        "name": "dbo.DimDepartmentGroup",
+        "columns": [
+          "DepartmentGroupKey INTEGER NOT NULL",
+          "ParentDepartmentGroupKey INTEGER",
+          "DepartmentGroupName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\""
+        ],
+        "humanDescription": "Şirketin finansal ve operasyonel departman gruplarının hiyerarşisini tutar.",
+        "businessRules": "Finansal raporlamalarda departman bazlı sorgular için 'DepartmentGroupKey' üzerinden FactFinance tablo ile eşleştirilir."
+      },
+      {
+        "name": "dbo.DimEmployee",
+        "columns": [
+          "EmployeeKey INTEGER NOT NULL",
+          "ParentEmployeeKey INTEGER",
+          "EmployeeNationalIDAlternateKey NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "ParentEmployeeNationalIDAlternateKey NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SalesTerritoryKey INTEGER",
+          "FirstName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "LastName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "MiddleName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "NameStyle BIT NOT NULL",
+          "Title NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "HireDate DATE",
+          "BirthDate DATE",
+          "LoginID NVARCHAR(256) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EmailAddress NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Phone NVARCHAR(25) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "MaritalStatus NCHAR(1) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EmergencyContactName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EmergencyContactPhone NVARCHAR(25) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SalariedFlag BIT",
+          "Gender NCHAR(1) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "PayFrequency TINYINT",
+          "BaseRate MONEY",
+          "VacationHours SMALLINT",
+          "SickLeaveHours SMALLINT",
+          "CurrentFlag BIT NOT NULL",
+          "SalesPersonFlag BIT NOT NULL",
+          "DepartmentName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "StartDate DATE",
+          "EndDate DATE",
+          "Status NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EmployeePhoto VARBINARY",
+          "SifreliTelefon VARBINARY"
+        ],
+        "humanDescription": "Şirket içi çalışanların ve sahadaki satış elemanlarının demografik (yaş, medeni hal), iletişim ve şirket içi durumu (unvan, departman, giriş tarihi, aktiflik) verilerini tutar.",
+        "businessRules": "Mevcut çalışanları bulmak için 'CurrentFlag' = 1 ve 'Status' = 'Current' filtreleri konulmalıdır. Eğer sadece satış personelini getirmek gerekiyorsa 'SalesPersonFlag' = 1 olmalıdır. Ad ve soyadı, FirstName ve LastName alanlarından türetilmelidir."
+      },
+      {
+        "name": "dbo.DimGeography",
+        "columns": [
+          "GeographyKey INTEGER NOT NULL",
+          "City NVARCHAR(30) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "StateProvinceCode NVARCHAR(3) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "StateProvinceName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "CountryRegionCode NVARCHAR(3) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EnglishCountryRegionName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SpanishCountryRegionName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "FrenchCountryRegionName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "PostalCode NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SalesTerritoryKey INTEGER",
+          "IpAddressLocator NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\""
+        ],
+        "humanDescription": "Satış noktası, bayi veya müşterinin lokasyonunu belli eden coğrafi (Ülke, Eyalet, Şehir ve Posta Kodu) lokasyonları tutar.",
+        "businessRules": "Satışların yoğun olduğu şehirleri belirlemek için müşteri (DimCustomer) veya bayi (DimReseller) üzerinden 'GeographyKey' ile bağlanılır. İngilizce sorgular için 'EnglishCountryRegionName' kullanılır."
+      },
+      {
+        "name": "dbo.DimOrganization",
+        "columns": [
+          "OrganizationKey INTEGER NOT NULL",
+          "ParentOrganizationKey INTEGER",
+          "PercentageOfOwnership NVARCHAR(16) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "OrganizationName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "CurrencyKey INTEGER"
+        ],
+        "humanDescription": "Kuruluş içindeki şirketler veya iştiraklerin hiyerarşik yapılarını belirtir.",
+        "businessRules": "Finansal (FactFinance) analizlerinde şirket/iştirak kırılımını görmek için 'OrganizationKey' kullanılır."
+      },
+      {
+        "name": "dbo.DimProduct",
+        "columns": [
+          "ProductKey INTEGER NOT NULL",
+          "ProductAlternateKey NVARCHAR(25) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "ProductSubcategoryKey INTEGER",
+          "WeightUnitMeasureCode NCHAR(3) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SizeUnitMeasureCode NCHAR(3) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EnglishProductName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SpanishProductName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "FrenchProductName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "StandardCost MONEY",
+          "FinishedGoodsFlag BIT NOT NULL",
+          "Color NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SafetyStockLevel SMALLINT",
+          "ReorderPoint SMALLINT",
+          "ListPrice MONEY",
+          "Size NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SizeRange NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Weight FLOAT",
+          "DaysToManufacture INTEGER",
+          "ProductLine NCHAR(2) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "DealerPrice MONEY",
+          "Class NCHAR(2) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Style NCHAR(2) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "ModelName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "LargePhoto VARBINARY",
+          "EnglishDescription NVARCHAR(400) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "FrenchDescription NVARCHAR(400) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "ChineseDescription NVARCHAR(400) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "ArabicDescription NVARCHAR(400) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "HebrewDescription NVARCHAR(400) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "ThaiDescription NVARCHAR(400) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "GermanDescription NVARCHAR(400) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "JapaneseDescription NVARCHAR(400) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "TurkishDescription NVARCHAR(400) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "StartDate DATETIME",
+          "EndDate DATETIME",
+          "Status NVARCHAR(7) COLLATE \"SQL_Latin1_General_CP1_CI_AS\""
+        ],
+        "humanDescription": "Müşterilere veya bayilere satılmak üzere olan ürünlerin detaylı kataloğu (Birim maliyetleri, liste fiyatı, ürün rengi, ürün modeli).",
+        "businessRules": "Bir ürünün kaç asıl kategoride olduğuna (Bisiklet, Giyim) erişmek istersen 'ProductSubcategoryKey' kullanan Subcategory - Category hiyerarşisi (DimProductSubcategory) kullanılır. Sadece satışı devam eden (geçerli) ürünler için 'Status'='Current' filtrelenebilir."
+      },
+      {
+        "name": "dbo.DimProductCategory",
+        "columns": [
+          "ProductCategoryKey INTEGER NOT NULL",
+          "ProductCategoryAlternateKey INTEGER",
+          "EnglishProductCategoryName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SpanishProductCategoryName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "FrenchProductCategoryName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL"
+        ],
+        "humanDescription": "Satılan ürünlerin (Örn: Bisikletler, Giyim Eşyaları) ana şemsiye kategorilerini tutar.",
+        "businessRules": "O ürünün adının veya gelir detaylarının analizlerinin kategori başlığında gruplandırılması ('EnglishProductCategoryName' kullanılarak) DimProductSubcategory aracılığıyla yapılır."
+      },
+      {
+        "name": "dbo.DimProductSubcategory",
+        "columns": [
+          "ProductSubcategoryKey INTEGER NOT NULL",
+          "ProductSubcategoryAlternateKey INTEGER",
+          "EnglishProductSubcategoryName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SpanishProductSubcategoryName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "FrenchProductSubcategoryName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "ProductCategoryKey INTEGER"
+        ],
+        "humanDescription": "Ana kategorilere (DimProductCategory) ait ürün alt gruplarının detayını (Örn: Dağ Bisikletleri kategori altındadır) tutar.",
+        "businessRules": "Ürün analizi yaparken DimProduct ile Kategoriler arasındaki ilişki bu ara köprü üzerinden 'ProductSubcategoryKey' birleştirilerek ('JOIN' ile) oluşturulur."
+      },
+      {
+        "name": "dbo.DimPromotion",
+        "columns": [
+          "PromotionKey INTEGER NOT NULL",
+          "PromotionAlternateKey INTEGER",
+          "EnglishPromotionName NVARCHAR(255) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SpanishPromotionName NVARCHAR(255) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "FrenchPromotionName NVARCHAR(255) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "DiscountPct FLOAT",
+          "EnglishPromotionType NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SpanishPromotionType NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "FrenchPromotionType NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EnglishPromotionCategory NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SpanishPromotionCategory NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "FrenchPromotionCategory NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "StartDate DATETIME NOT NULL",
+          "EndDate DATETIME",
+          "MinQty INTEGER",
+          "MaxQty INTEGER"
+        ],
+        "humanDescription": "Sezon sonu indirim kampanyaları ve indirim oranı olan yüzdesel (DiscountPct) verilerini saklar.",
+        "businessRules": "Sales tablolarıyla bağlanıldığında, müşterilerin hangi indirim türü üzerinden veya 'No Discount' (Promosyonsuz) aldıkları analiz edilir."
+      },
+      {
+        "name": "dbo.DimReseller",
+        "columns": [
+          "ResellerKey INTEGER NOT NULL",
+          "GeographyKey INTEGER",
+          "ResellerAlternateKey NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Phone NVARCHAR(25) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "BusinessType VARCHAR(20) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "ResellerName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "NumberEmployees INTEGER",
+          "OrderFrequency CHAR(1) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "OrderMonth TINYINT",
+          "FirstOrderYear INTEGER",
+          "LastOrderYear INTEGER",
+          "ProductLine NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "AddressLine1 NVARCHAR(60) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "AddressLine2 NVARCHAR(60) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "AnnualSales MONEY",
+          "BankName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "MinPaymentType TINYINT",
+          "MinPaymentAmount MONEY",
+          "AnnualRevenue MONEY",
+          "YearOpened INTEGER"
+        ],
+        "humanDescription": "Müşterilere satış yapmak yerine Toptan mal satan bayi/partner firmalarının unvan ve işletme profili bilgileridir.",
+        "businessRules": "Kime (ResellerName) ne kadar toptan satış yapıldığını bulmak için FactResellerSales ile köprü 'ResellerKey' kullanılarak oluşturulur."
+      },
+      {
+        "name": "dbo.DimSalesReason",
+        "columns": [
+          "SalesReasonKey INTEGER NOT NULL",
+          "SalesReasonAlternateKey INTEGER NOT NULL",
+          "SalesReasonName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SalesReasonReasonType NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL"
+        ],
+        "humanDescription": "Satışların gerçekleşmesindeki veya müşterinin satın alım kararındaki etken olan müşteri nedenini (Fiyat, TV Reklamı vb.) tutar.",
+        "businessRules": "Cevabın FactInternetSalesReason köprü veri alanları ile analizini yürüt."
+      },
+      {
+        "name": "dbo.DimSalesTerritory",
+        "columns": [
+          "SalesTerritoryKey INTEGER NOT NULL",
+          "SalesTerritoryAlternateKey INTEGER",
+          "SalesTerritoryRegion NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SalesTerritoryCountry NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SalesTerritoryGroup NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "SalesTerritoryImage VARBINARY"
+        ],
+        "humanDescription": "Bölgelere ait ana kıta veya Satış alan organizasyon yönergelerini depolar.",
+        "businessRules": "Satış bölge performansı, Satış yetkilisi (DimEmployee) lokasyonu belirlemek için ilgili Fact tablolarında bulunan 'SalesTerritoryKey' ile eşleştirilmelidir."
+      },
+      {
+        "name": "dbo.DimScenario",
+        "columns": [
+          "ScenarioKey INTEGER NOT NULL",
+          "ScenarioName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\""
+        ],
+        "humanDescription": "Fiili bütçe (Actual) ya da tahmin vb finansal raporlama varyasyonları ve senaryo tanımları.",
+        "businessRules": "FactFinance raporlamalarında kullanılan gruplama referans boyutudur."
+      },
+      {
+        "name": "dbo.FactAdditionalInternationalProductDescription",
+        "columns": [
+          "ProductKey INTEGER NOT NULL",
+          "CultureName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "ProductDescription NVARCHAR COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL"
+        ],
+        "humanDescription": "Ürünlere ait farklı ülkeler veya bölgeler (kültürler) için ekstra açıklama listesidir.",
+        "businessRules": "Ürün tanıtım detayları veya çeviri listeleri için 'ProductKey' üzerinden çağrılır."
+      },
+      {
+        "name": "dbo.FactCallCenter",
+        "columns": [
+          "FactCallCenterID INTEGER NOT NULL",
+          "DateKey INTEGER NOT NULL",
+          "WageType NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "Shift NVARCHAR(20) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "LevelOneOperators SMALLINT NOT NULL",
+          "LevelTwoOperators SMALLINT NOT NULL",
+          "TotalOperators SMALLINT NOT NULL",
+          "Calls INTEGER NOT NULL",
+          "AutomaticResponses INTEGER NOT NULL",
+          "Orders INTEGER NOT NULL",
+          "IssuesRaised SMALLINT NOT NULL",
+          "AverageTimePerIssue SMALLINT NOT NULL",
+          "ServiceGrade FLOAT NOT NULL",
+          "Date DATETIME"
+        ],
+        "humanDescription": "Müşteri çağrı istasyonlarının günlük operasyon detayları, arayan veya düşen arama performansı ve servis kalite anketleri (ServiceGrade) listelenir.",
+        "businessRules": "Performans takibi veya maliyet analizinde tarih için DateKey kullanılır."
+      },
+      {
+        "name": "dbo.FactCurrencyRate",
+        "columns": [
+          "CurrencyKey INTEGER NOT NULL",
+          "DateKey INTEGER NOT NULL",
+          "AverageRate FLOAT NOT NULL",
+          "EndOfDayRate FLOAT NOT NULL",
+          "Date DATETIME"
+        ],
+        "humanDescription": "Gün bazında döviz kurlarının finansal piyasadaki kapanış ve ortalamalarını kaydeder.",
+        "businessRules": "Şirketin küresel çapta yerel döviz kurları ile satışlarını referans döviz kuruna çevirmek için DateKey ve CurrencyKey ile diğer Fact tabloları ile işleme dahil olur."
+      },
+      {
+        "name": "dbo.FactFinance",
+        "columns": [
+          "FinanceKey INTEGER NOT NULL",
+          "DateKey INTEGER NOT NULL",
+          "OrganizationKey INTEGER NOT NULL",
+          "DepartmentGroupKey INTEGER NOT NULL",
+          "ScenarioKey INTEGER NOT NULL",
+          "AccountKey INTEGER NOT NULL",
+          "Amount FLOAT NOT NULL",
+          "Date DATETIME"
+        ],
+        "humanDescription": "Şirket içi muhasebe ve planlamaların ana nakit/veri havuzudur; muhasebeleştirilmiş miktar (Amount) sonuçlarını barındırır.",
+        "businessRules": "Bölüm, Hesap Yeri, Hesap Tipi bazındaki muhasebesel harcamalar veya bütçe sapma oranı analizi için kullanılır. Miktar hesaplamak için hesap türlerinin SUM(Amount) alınmalıdır."
+      },
+      {
+        "name": "dbo.FactInternetSales",
+        "columns": [
+          "ProductKey INTEGER NOT NULL",
+          "OrderDateKey INTEGER NOT NULL",
+          "DueDateKey INTEGER NOT NULL",
+          "ShipDateKey INTEGER NOT NULL",
+          "CustomerKey INTEGER NOT NULL",
+          "PromotionKey INTEGER NOT NULL",
+          "CurrencyKey INTEGER NOT NULL",
+          "SalesTerritoryKey INTEGER NOT NULL",
+          "SalesOrderNumber NVARCHAR(20) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SalesOrderLineNumber TINYINT NOT NULL",
+          "RevisionNumber TINYINT NOT NULL",
+          "OrderQuantity SMALLINT NOT NULL",
+          "UnitPrice MONEY NOT NULL",
+          "ExtendedAmount MONEY NOT NULL",
+          "UnitPriceDiscountPct FLOAT NOT NULL",
+          "DiscountAmount FLOAT NOT NULL",
+          "ProductStandardCost MONEY NOT NULL",
+          "TotalProductCost MONEY NOT NULL",
+          "SalesAmount MONEY NOT NULL",
+          "TaxAmt MONEY NOT NULL",
+          "Freight MONEY NOT NULL",
+          "CarrierTrackingNumber NVARCHAR(25) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "CustomerPONumber NVARCHAR(25) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "OrderDate DATETIME",
+          "DueDate DATETIME",
+          "ShipDate DATETIME"
+        ],
+        "humanDescription": "Web sitesi vb B2C online müşterilerin gerçekleştirdiği satın alma fatura detayları (ciro vb.).",
+        "businessRules": "İnternet bazlı perakende ticaretten sağlanan toplam geliri net şekilde tespit etmek için 'SalesAmount' toplamak gerekir. Bir ürünün kar hesaplaması (SalesAmount-TotalProductCost) şeklinde değerlendirilir. Sipariş miktarı için OrderQuantity toplanır."
+      },
+      {
+        "name": "dbo.FactInternetSalesReason",
+        "columns": [
+          "SalesOrderNumber NVARCHAR(20) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SalesOrderLineNumber TINYINT NOT NULL",
+          "SalesReasonKey INTEGER NOT NULL"
+        ],
+        "humanDescription": "Sipariş listesini satın alım yapılan etkileşim tablosu ile müşterinin karar etkeninin birbirine eklendiği köprü.",
+        "businessRules": "Sipariş verip hangi kaynağı tercih edenlerin sıklılığını Fact tablolarını 'SalesOrderNumber' ile eşleyerek yapar."
+      },
+      {
+        "name": "dbo.FactProductInventory",
+        "columns": [
+          "ProductKey INTEGER NOT NULL",
+          "DateKey INTEGER NOT NULL",
+          "MovementDate DATE NOT NULL",
+          "UnitCost MONEY NOT NULL",
+          "UnitsIn INTEGER NOT NULL",
+          "UnitsOut INTEGER NOT NULL",
+          "UnitsBalance INTEGER NOT NULL"
+        ],
+        "humanDescription": "Fabrika ve stok merkezlerindeki günlük/aylık giriş-çıkış transferlerini ve stok net sayısını izler.",
+        "businessRules": "Geriye dönük sorgulama ve stok envanter bakiyesini sorgulamak için 'UnitsBalance' sütunu kullanılır."
+      },
+      {
+        "name": "dbo.FactResellerSales",
+        "columns": [
+          "ProductKey INTEGER NOT NULL",
+          "OrderDateKey INTEGER NOT NULL",
+          "DueDateKey INTEGER NOT NULL",
+          "ShipDateKey INTEGER NOT NULL",
+          "ResellerKey INTEGER NOT NULL",
+          "EmployeeKey INTEGER NOT NULL",
+          "PromotionKey INTEGER NOT NULL",
+          "CurrencyKey INTEGER NOT NULL",
+          "SalesTerritoryKey INTEGER NOT NULL",
+          "SalesOrderNumber NVARCHAR(20) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "SalesOrderLineNumber TINYINT NOT NULL",
+          "RevisionNumber TINYINT",
+          "OrderQuantity SMALLINT",
+          "UnitPrice MONEY",
+          "ExtendedAmount MONEY",
+          "UnitPriceDiscountPct FLOAT",
+          "DiscountAmount FLOAT",
+          "ProductStandardCost MONEY",
+          "TotalProductCost MONEY",
+          "SalesAmount MONEY",
+          "TaxAmt MONEY",
+          "Freight MONEY",
+          "CarrierTrackingNumber NVARCHAR(25) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "CustomerPONumber NVARCHAR(25) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "OrderDate DATETIME",
+          "DueDate DATETIME",
+          "ShipDate DATETIME"
+        ],
+        "humanDescription": "Doğrudan müşteri yerine (B2B) olarak bayilere sipariş ve satış işlemi detay fatura sonuçlarını sunar.",
+        "businessRules": "Bölgesel, çalışanlara (EmployeeKey) ait başarılı olan sipariş tutarı 'SalesAmount' toplama ve satılan adet 'OrderQuantity' ölçüleri toplanarak değerlendirilmelidir."
+      },
+      {
+        "name": "dbo.FactSalesQuota",
+        "columns": [
+          "SalesQuotaKey INTEGER NOT NULL",
+          "EmployeeKey INTEGER NOT NULL",
+          "DateKey INTEGER NOT NULL",
+          "CalendarYear SMALLINT NOT NULL",
+          "CalendarQuarter TINYINT NOT NULL",
+          "SalesAmountQuota MONEY NOT NULL",
+          "Date DATETIME"
+        ],
+        "humanDescription": "Satış teşviki alan sahada çalışan elemanın (Employee), dönemsel (yıllık/çeyrek) satması gereken atanmış parasal hedefleri gösterir.",
+        "businessRules": "Gerçekleşen 'Miktar' ile o çalışana ait hedeflenen (SalesAmountQuota) satış arasındaki Performans kıstasını elde etmek amaçlı DimEmployee tablosu referans gösterilir."
+      },
+      {
+        "name": "dbo.FactSurveyResponse",
+        "columns": [
+          "SurveyResponseKey INTEGER NOT NULL",
+          "DateKey INTEGER NOT NULL",
+          "CustomerKey INTEGER NOT NULL",
+          "ProductCategoryKey INTEGER NOT NULL",
+          "EnglishProductCategoryName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "ProductSubcategoryKey INTEGER NOT NULL",
+          "EnglishProductSubcategoryName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "Date DATETIME"
+        ],
+        "humanDescription": "Satış sonrası müşterilerden sağlanan anket detayları ve kategorilere göre görüş değerlendirmeleri.",
+        "businessRules": "Anketteki tepki sayısını Müşteri verisi dahilinde ölçmek için kullanılır."
+      },
+      {
+        "name": "dbo.KritikFinansVerileri",
+        "columns": [
+          "ID INTEGER NOT NULL",
+          "IslemAdi NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Miktar DECIMAL(18, 2)"
+        ],
+        "humanDescription": "Özel raporlama formatında, sisteme istisnai şekilde işlenmiş harici finans tutarlarını muhafaza eder.",
+        "businessRules": "Kayıtlara işlenen miktar toplam formülleriyle Miktar sütununda değerlendirilir."
+      },
+      {
+        "name": "dbo.NewFactCurrencyRate",
+        "columns": [
+          "AverageRate REAL",
+          "CurrencyID NVARCHAR(3) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "CurrencyDate DATE",
+          "EndOfDayRate REAL",
+          "CurrencyKey INTEGER",
+          "DateKey INTEGER"
+        ],
+        "humanDescription": "Harici formatta yüklenmiş olan ek kur verisini belirler.",
+        "businessRules": "FactCurrencyRate ile benzer."
+      },
+      {
+        "name": "dbo.ProspectiveBuyer",
+        "columns": [
+          "ProspectiveBuyerKey INTEGER NOT NULL",
+          "ProspectAlternateKey NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "FirstName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "MiddleName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "LastName NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "BirthDate DATETIME",
+          "MaritalStatus NCHAR(1) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Gender NVARCHAR(1) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "EmailAddress NVARCHAR(50) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "YearlyIncome MONEY",
+          "TotalChildren TINYINT",
+          "NumberChildrenAtHome TINYINT",
+          "Education NVARCHAR(40) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Occupation NVARCHAR(100) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "HouseOwnerFlag NCHAR(1) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "NumberCarsOwned TINYINT",
+          "AddressLine1 NVARCHAR(120) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "AddressLine2 NVARCHAR(120) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "City NVARCHAR(30) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "StateProvinceCode NVARCHAR(3) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "PostalCode NVARCHAR(15) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Phone NVARCHAR(20) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Salutation NVARCHAR(8) COLLATE \"SQL_Latin1_General_CP1_CI_AS\"",
+          "Unknown INTEGER"
+        ],
+        "humanDescription": "Pazarlama ve araştırma alanında hedefleme olarak değerlendirilebilir potansiyel (Aday) müşteri profillerinin listesidir.",
+        "businessRules": "Şimdilik bir müşteri olmadıkları için satış analizleri yerine 'Pazarlama listesi' segment araştırmasında dahil edilir."
+      },
+      {
+        "name": "dbo.sysdiagrams",
+        "columns": [
+          "name NVARCHAR(128) COLLATE \"SQL_Latin1_General_CP1_CI_AS\" NOT NULL",
+          "principal_id INTEGER NOT NULL",
+          "diagram_id INTEGER NOT NULL",
+          "version INTEGER",
+          "definition VARBINARY"
+        ],
+        "humanDescription": "Veritabanına ait tablolar arası ilişki tablolarını listeler.",
+        "businessRules": "Müşterinin sorularından bağımsız bir SQL yapı tablosu, asla rapor listeleriyle dahil edilmemelidir."
+      }
+    ],
+    "fewShotExamples": [
+      {
+        "question": "Toplam internet satış geliri nedir?",
+        "sql": "SELECT SUM(SalesAmount) AS ToplamSatisGeliri FROM dbo.FactInternetSales"
+      },
+      {
+        "question": "Alınan toptan satış siparişlerinden gelen ciro müşteri adı, ülkesi ve siparişi şeklinde kimlerdir?",
+        "sql": "SELECT c.FirstName, c.LastName, g.EnglishCountryRegionName, SUM(s.SalesAmount) AS ToplamTutar FROM dbo.FactInternetSales s INNER JOIN dbo.DimCustomer c ON s.CustomerKey = c.CustomerKey INNER JOIN dbo.DimGeography g ON c.GeographyKey = g.GeographyKey GROUP BY c.FirstName, c.LastName, g.EnglishCountryRegionName ORDER BY ToplamTutar DESC"
+      },
+      {
+        "question": "En yaygın eğitim seviyesine sahip olan müşterilerin sayısı kaçtır?",
+        "sql": "SELECT EnglishEducation, COUNT(CustomerKey) AS KisiSayisi FROM dbo.DimCustomer GROUP BY EnglishEducation ORDER BY KisiSayisi DESC"
+      },
+      {
+         "question": "Şu anda ne kadar ürün bakiyesi var ve bu depodaki stok miktarı ne durumdadır?",
+         "sql": "SELECT p.EnglishProductName, SUM(inv.UnitsBalance) AS BakiyeStok FROM dbo.FactProductInventory inv INNER JOIN dbo.DimProduct p ON p.ProductKey = inv.ProductKey GROUP BY p.EnglishProductName ORDER BY BakiyeStok DESC"
+      },
+      {
+         "question": "nasılsın",
+         "sql": "SELECT 'Bu soru veritabanı tabloları ve iş akışıyla (satış, müşteri, ürün vb.) ilgili değildir.' AS HataMesaji"
+      },
+      {
+         "question": "yeşil",
+         "sql": "SELECT 'Lütfen neyi bulmak istediğinizi daha net ifade edin (Örn: Yeşil renkli ürünleri listele).' AS HataMesaji"
+      },
+      {
+         "question": "bana bir fıkra anlat",
+         "sql": "SELECT 'Ben bir veritabanı asistanıyım, yalnızca sistemdeki iş verileriyle ilgili soruları yanıtlayabilirim.' AS HataMesaji"
+      },
+      {
+         "question": "asdasdasd",
+         "sql": "SELECT 'Girdiğiniz ifade anlaşılamadı. Lütfen geçerli ve anlamlı bir sorgu cümlesi yazın.' AS HataMesaji"
+      },
+      {
+         "question": "bütün verileri sil",
+         "sql": "SELECT 'Güvenlik nedeniyle veritabanında silme veya değiştirme (DROP, DELETE, UPDATE) işlemi yapılamaz. Sadece veri okuyabilirim.' AS HataMesaji"
+      },
+      {
+         "question": "sen kimsin",
+         "sql": "SELECT 'Ben NL2SQL platformunun yapay zeka asistanıyım. Veritabanındaki bilgilere doğal dille ulaşmanıza yardımcı olurum.' AS HataMesaji"
+      },
+      {
+         "question": "her şeyi getir",
+         "sql": "SELECT 'Lütfen hangi veriyi (siparişler, müşteriler, ürünler vb.) görmek istediğinizi daha belirgin yazın.' AS HataMesaji"
+      }
+    ]
+  }
